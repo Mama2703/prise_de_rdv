@@ -78,4 +78,4 @@ Tout se règle dans le bloc `CONFIG` en haut de `backend/Code.gs` (et pour l'aff
 - Les créneaux tiennent compte des rendez-vous du site, **pas** des autres événements de ton agenda iCloud.
 - Pas de temps de trajet ajouté automatiquement pour les rendez-vous à domicile.
 - Quota Google gratuit : ~100 emails/jour (2 par demande, 1 par validation).
-- Mentions légales : si l'activité est déclarée, ajouter le nom complet et le **SIRET** dans la rubrique « Mentions légales » de `index.html`.
+- Mentions légales : pas de SIRET pour l'instant ; à ajouter dans la rubrique « Mentions légales » de `index.html` si l'activité est déclarée un jour.
