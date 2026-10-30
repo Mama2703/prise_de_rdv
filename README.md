@@ -17,7 +17,7 @@ Cliente ──▶ site (GitHub Pages) ──▶ Apps Script (Google, gratuit) �
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Le site (une seule page). Sans backend branché, il tourne en **mode démo**. |
-| `backend/Code.gs`, `backend/Examen.html` | Le backend à coller dans Google Apps Script |
+| `backend/Code.gs` | Le backend à coller dans Google Apps Script (un seul fichier) |
 | `outils/trouver_calendrier_icloud.py` | Trouve l'URL CalDAV de ton calendrier iCloud (à lancer une fois) |
 | `tests/backend.test.js` | Tests automatisés des créneaux et du fichier agenda : `node tests/backend.test.js` |
 
@@ -48,7 +48,7 @@ Tout se règle dans le bloc `CONFIG` en haut de `backend/Code.gs` (et pour l'aff
 ### 2. Google : le backend
 
 1. Crée une Google Sheet vide (« RDV Naboo »), puis **Extensions → Apps Script**.
-2. Remplace `Code.gs` par `backend/Code.gs`. Ajoute un fichier **HTML** nommé exactement `Examen` avec `backend/Examen.html`.
+2. Remplace le contenu de `Code.gs` par celui de `backend/Code.gs` (un seul fichier à coller). Faisable sur iPhone dans Safari en « version pour ordinateur ».
 3. *(Facultatif)* Renseigne `ADRESSE_SALON` dans `CONFIG` : elle n'est envoyée que dans l'email de confirmation.
 4. **⚙ Paramètres du projet → Propriétés du script** :
 
