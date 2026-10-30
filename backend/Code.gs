@@ -30,12 +30,13 @@ const CONFIG = {
   // si la prestation doit aussi être terminée avant l'heure de fin.
   HORAIRES: {
     1: [], 2: [], 3: [], 4: [], 5: [],
-    6: [['10:00', '16:00']],
-    7: [['10:00', '16:00']],
+    6: [['09:00', '16:00']],
+    7: [['09:00', '16:00']],
   },
   DEBUT_SEULEMENT: true,
 
   ACOMPTE: '10 €',           // acompte demandé pour confirmer le RDV
+  SUPPLEMENT_DOMICILE: '15 €', // déplacement à domicile dans Poitiers
 
   JOURS_FERMES: [],          // ex. ['2026-12-26', '2026-12-27'] (congés)
   PAS_CRENEAUX: 60,          // un créneau toutes les heures
@@ -47,7 +48,7 @@ const CONFIG = {
 
 const FEUILLE = 'Rendez-vous';
 const COLONNES = ['id', 'token', 'creeLe', 'statut', 'prestationId', 'prestation',
-  'debut', 'fin', 'nom', 'email', 'telephone', 'message', 'uidAgenda'];
+  'debut', 'fin', 'nom', 'email', 'telephone', 'message', 'uidAgenda', 'lieu', 'adresse'];
 
 const STATUT = { ATTENTE: 'en_attente', VALIDE: 'valide', REFUSE: 'refuse', ANNULE: 'annule' };
 
@@ -92,6 +93,10 @@ function doPost(e) {
     if (!nom) throw new Error('Le nom est obligatoire.');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Email invalide.');
     if (d.conditions !== true) throw new Error('Merci d\'accepter les conditions de réservation.');
+    const domicile = d.lieu === 'domicile';
+    const adresse = domicile ? nettoie_(d.adresse, 200) : '';
+    if (domicile && adresse.length < 8) throw new Error('Merci d\'indiquer votre adresse complète à Poitiers.');
+    const lieuTxt = domicile ? 'À domicile (+' + CONFIG.SUPPLEMENT_DOMICILE + ') : ' + adresse : 'Chez Naboo';
 
     lock.waitLock(20000);
     // Revérifie que le créneau est toujours libre (deux clients en même temps)
@@ -105,7 +110,8 @@ function doPost(e) {
     const token = Utilities.getUuid().replace(/-/g, '');
 
     feuille_().appendRow([id, token, new Date(), STATUT.ATTENTE, presta.id, presta.nom,
-      debut.toISOString(), fin.toISOString(), nom, email, tel, message, '']);
+      debut.toISOString(), fin.toISOString(), nom, email, tel, message, '',
+      domicile ? 'domicile' : 'salon', adresse]);
     SpreadsheetApp.flush();
     lock.releaseLock();
 
@@ -119,6 +125,7 @@ function doPost(e) {
         '<p><b>' + esc_(nom) + '</b> demande un rendez-vous :</p>' +
         '<ul><li>' + esc_(presta.nom) + ' (' + presta.duree + ' min)</li>' +
         '<li>' + esc_(quand) + '</li>' +
+        '<li>' + esc_(lieuTxt) + '</li>' +
         '<li>' + esc_(email) + (tel ? ' — ' + esc_(tel) : '') + '</li></ul>' +
         (message ? '<p>Message : ' + esc_(message) + '</p>' : '') +
         '<p>Pense à demander l\'acompte de ' + CONFIG.ACOMPTE + ' avant de valider.</p>' +
@@ -134,7 +141,8 @@ function doPost(e) {
       htmlBody:
         '<p>Bonjour ' + esc_(nom) + ',</p>' +
         '<p>Votre demande pour <b>' + esc_(presta.nom) + '</b> le <b>' + esc_(quand) +
-        '</b> a bien été reçue.</p>' +
+        '</b> a bien été reçue.<br>Lieu : ' + esc_(lieuTxt) + '</p>' +
+        '<p>Pensez à acheter vos mèches avant le rendez-vous : elles ne sont pas fournies.</p>' +
         '<p>Pour confirmer votre rendez-vous, un <b>acompte de ' + CONFIG.ACOMPTE + '</b> vous sera demandé. ' +
         'Il est déduit du prix de la prestation et n\'est pas remboursable en cas d\'annulation moins de 24 h avant. ' +
         'Vous recevrez un email de confirmation dès réception.</p>' +
@@ -179,7 +187,9 @@ function decider(id, token, decision) {
         htmlBody:
           '<p>Bonjour ' + esc_(rdv.nom) + ',</p>' +
           '<p>Votre rendez-vous <b>' + esc_(rdv.prestation) + '</b> est confirmé pour le <b>' +
-          esc_(quand) + '</b>.' + (CONFIG.LIEU ? '<br>Lieu : ' + esc_(CONFIG.LIEU) : '') + '</p>' +
+          esc_(quand) + '</b>.<br>Lieu : ' + esc_(rdv.lieu === 'domicile' ? 'à domicile, ' + rdv.adresse +
+          ' (supplément ' + CONFIG.SUPPLEMENT_DOMICILE + ')' : (CONFIG.LIEU || 'chez Naboo')) + '</p>' +
+          '<p>N\'oubliez pas vos mèches (non fournies).</p>' +
           '<p>Merci de venir avec les cheveux propres, démêlés et sans produit. ' +
           'Rappel : l\'acompte n\'est pas remboursable en cas d\'annulation moins de 24 h avant le rendez-vous.</p>' +
           '<p>Vous pouvez l\'ajouter à votre agenda avec le fichier joint.</p>' +
@@ -304,6 +314,7 @@ function configPublique_() {
     joursMax: CONFIG.JOURS_MAX_A_L_AVANCE,
     acompte: CONFIG.ACOMPTE,
     delaiHeures: CONFIG.DELAI_MIN_HEURES,
+    supplementDomicile: CONFIG.SUPPLEMENT_DOMICILE,
     // heure de début la plus tardive possible, tous jours confondus (sert à griser les jours trop proches)
     dernierDebut: Object.keys(CONFIG.HORAIRES).reduce((m, k) => CONFIG.HORAIRES[k].reduce((mm, r) => r[1] > mm ? r[1] : mm, m), '00:00'),
   };
@@ -355,7 +366,8 @@ function construireIcs_(uid, debut, fin, rdv, pourMoi) {
   const utc = d => Utilities.formatDate(d, 'UTC', "yyyyMMdd'T'HHmmss'Z'");
   const titre = pourMoi ? rdv.prestation + ' — ' + rdv.nom : rdv.prestation + ' — ' + CONFIG.NOM_ACTIVITE;
   const desc = pourMoi
-    ? ['Client : ' + rdv.nom, 'Email : ' + rdv.email, rdv.telephone ? 'Tél : ' + rdv.telephone : '',
+    ? [rdv.lieu === 'domicile' ? 'À DOMICILE (+' + CONFIG.SUPPLEMENT_DOMICILE + ') : ' + rdv.adresse : '',
+       'Client : ' + rdv.nom, 'Email : ' + rdv.email, rdv.telephone ? 'Tél : ' + rdv.telephone : '',
        rdv.message ? 'Message : ' + rdv.message : ''].filter(Boolean).join('\n')
     : 'Rendez-vous confirmé.';
 
@@ -369,7 +381,8 @@ function construireIcs_(uid, debut, fin, rdv, pourMoi) {
     'SUMMARY:' + icsTexte_(titre),
     'DESCRIPTION:' + icsTexte_(desc),
   ];
-  if (CONFIG.LIEU) lignes.push('LOCATION:' + icsTexte_(CONFIG.LIEU));
+  const lieuEvt = rdv.lieu === 'domicile' && rdv.adresse ? rdv.adresse : CONFIG.LIEU;
+  if (lieuEvt) lignes.push('LOCATION:' + icsTexte_(lieuEvt));
   if (pourMoi && CONFIG.RAPPEL_MINUTES > 0) {
     lignes.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsTexte_(titre),
       'TRIGGER:-PT' + CONFIG.RAPPEL_MINUTES + 'M', 'END:VALARM');
@@ -400,6 +413,7 @@ function pageExamen_(id, token) {
     id: rdv.id, token: rdv.token, statut: rdv.statut, nom: rdv.nom, email: rdv.email,
     telephone: rdv.telephone, message: rdv.message, prestation: rdv.prestation,
     quand: formatQuand_(new Date(rdv.debut)),
+    lieu: rdv.lieu === 'domicile' ? 'À domicile (+' + CONFIG.SUPPLEMENT_DOMICILE + ') : ' + rdv.adresse : 'Chez Naboo',
   } : null;
   return t.evaluate().setTitle('Demande de rendez-vous')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');

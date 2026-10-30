@@ -75,6 +75,13 @@
   .infos-pratiques span.t { color: var(--doux); font-size: 14px; }
   .case { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; font-size: 14px; font-weight: 400; cursor: pointer; }
   .case input { width: 20px; height: 20px; flex: 0 0 20px; margin: 1px 0 0; accent-color: var(--accent); }
+  .label-groupe { font-size: 14px; font-weight: 500; margin: 0 0 6px; }
+  .lieux { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .lieu { margin: 0; display: flex; gap: 8px; align-items: flex-start; border: 1.5px solid var(--bord); border-radius: 12px; padding: 10px 12px; cursor: pointer; font-weight: 400; }
+  .lieu:has(input:checked) { border-color: var(--accent); background: var(--accent-doux); }
+  .lieu input { width: auto; accent-color: var(--accent); margin-top: 3px; }
+  .lieu b { display: block; font-weight: 600; } .lieu small { color: var(--doux); }
+  .boutiques li { align-items: flex-start; }
   .recap .acompte { display: block; margin-top: 6px; font-size: 14px; color: var(--doux); }
   footer { text-align: center; color: var(--doux); font-size: 14px; padding: 8px 16px 40px; font-family: "Josefin Sans", sans-serif; }
   footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
@@ -89,17 +96,6 @@
 </div>
 <main>
   <div id="demo" class="demo" hidden>Mode démo : aucune demande n'est réellement envoyée. Les réservations seront bientôt ouvertes.</div>
-
-  <section class="infos-pratiques" aria-labelledby="titre-infos">
-    <h2 id="titre-infos">Bon à savoir</h2>
-    <ul>
-      <li><span class="ic">📅</span><div><b>Réservation 48 h à l'avance</b><span class="t">Rendez-vous le samedi et le dimanche, à partir de 10 h (dernier début à 16 h).</span></div></li>
-      <li><span class="ic">💶</span><div><b>Acompte de 10 €</b><span class="t">Demandé pour confirmer le rendez-vous et déduit du prix. Non remboursable en cas d'annulation moins de 24 h avant.</span></div></li>
-      <li><span class="ic">✨</span><div><b>Préparation</b><span class="t">Venez les cheveux propres, démêlés et sans produit.</span></div></li>
-      <li><span class="ic">⏱️</span><div><b>Durées indicatives</b><span class="t">Elles varient selon la longueur, l'épaisseur et le modèle choisi.</span></div></li>
-      <li><span class="ic">📸</span><div><b>Une idée de modèle ?</b><span class="t">Décrivez-la dans le message ou envoyez une photo sur Instagram <a href="https://www.instagram.com/naboo__dioum/" target="_blank" rel="noopener">@naboo__dioum</a>.</span></div></li>
-    </ul>
-  </section>
 
   <div id="app">
     <section id="s1">
@@ -117,6 +113,15 @@
     <section id="s3" class="verrou">
       <h2><span class="num">3</span>Vos coordonnées</h2>
       <form id="form" novalidate>
+        <div class="label-groupe">Lieu du rendez-vous</div>
+        <div class="lieux" role="radiogroup" aria-label="Lieu du rendez-vous">
+          <label class="lieu"><input type="radio" name="lieu" value="salon" checked> <span><b>Chez Naboo</b><small>Poitiers</small></span></label>
+          <label class="lieu"><input type="radio" name="lieu" value="domicile"> <span><b>À domicile</b><small>dans Poitiers · +15 €</small></span></label>
+        </div>
+        <div id="bloc-adresse" hidden>
+          <label for="adresse">Votre adresse à Poitiers</label>
+          <input id="adresse" name="adresse" autocomplete="street-address" maxlength="200" placeholder="N°, rue, code postal">
+        </div>
         <label for="nom">Nom et prénom</label>
         <input id="nom" name="nom" autocomplete="name" required maxlength="80">
         <label for="email">Email</label>
@@ -134,6 +139,25 @@
       </form>
     </section>
   </div>
+  <section class="infos-pratiques" aria-labelledby="titre-infos">
+    <h2 id="titre-infos">Bon à savoir</h2>
+    <ul>
+      <li><span class="ic">📅</span><div><b>Réservation 48 h à l'avance</b><span class="t">Rendez-vous le samedi et le dimanche, de 9 h à 16 h (heure de début).</span></div></li>
+      <li><span class="ic">💶</span><div><b>Acompte de 10 €</b><span class="t">Demandé pour confirmer le rendez-vous et déduit du prix. Non remboursable en cas d'annulation moins de 24 h avant.</span></div></li>
+      <li><span class="ic">🛍️</span><div><b>Mèches non fournies</b><span class="t">Elles sont à acheter avant le rendez-vous. Voir les boutiques ci-dessous.</span></div></li>
+      <li><span class="ic">🚗</span><div><b>À domicile dans Poitiers</b><span class="t">Je me déplace chez vous pour un supplément de 15 €.</span></div></li>
+      <li><span class="ic">✨</span><div><b>Préparation</b><span class="t">Venez les cheveux propres, démêlés et sans produit.</span></div></li>
+      <li><span class="ic">⏱️</span><div><b>Durées indicatives</b><span class="t">Elles varient selon la longueur, l'épaisseur et le modèle choisi.</span></div></li>
+      <li><span class="ic">📸</span><div><b>Une idée de modèle ?</b><span class="t">Décrivez-la dans le message ou envoyez une photo sur Instagram <a href="https://www.instagram.com/naboo__dioum/" target="_blank" rel="noopener">@naboo__dioum</a>.</span></div></li>
+    </ul>
+  </section>
+
+  <section class="infos-pratiques boutiques" aria-labelledby="titre-boutiques">
+    <h2 id="titre-boutiques">Où acheter vos mèches à Poitiers</h2>
+    <ul id="liste-boutiques"></ul>
+    <p class="vide">Pensez à appeler avant de vous déplacer pour vérifier le stock. Un doute sur la quantité ou la couleur ? Demandez-moi sur Instagram.</p>
+  </section>
+
 </main>
 <footer>
   <div class="ligne">
@@ -183,11 +207,11 @@ const pause = ms => new Promise(r => setTimeout(r, ms));
 async function demo(p) {
   await pause(250);
   if (p.action === 'config') return { ok: true, config: {
-    nom: 'Naboo', prestations: DEMO_PRESTAS, joursOuverts: [6, 7], joursFermes: [], joursMax: 45, acompte: '10 €', delaiHeures: 48, dernierDebut: '16:00' } };
+    nom: 'Naboo', prestations: DEMO_PRESTAS, joursOuverts: [6, 7], joursFermes: [], joursMax: 45, acompte: '10 €', delaiHeures: 48, dernierDebut: '16:00', supplementDomicile: '15 €' } };
   // Créneaux fictifs : 9h-19h, toutes les heures, selon la durée de la prestation
   const duree = (DEMO_PRESTAS.find(x => x.id === p.prestation) || { duree: 60 }).duree;
   const res = [];
-  for (let h = 10; h <= 16; h++) res.push(String(h).padStart(2, '0') + ':00');
+  for (let h = 9; h <= 16; h++) res.push(String(h).padStart(2, '0') + ':00');
   const lim = Date.now() + 48 * 3600000;
   if (new Date(p.date + 'T10:00:00') < lim) return { ok: true, creneaux: [] };
   return { ok: true, creneaux: res };
@@ -281,6 +305,7 @@ function majRecap() {
   $('recap').innerHTML = '<b>' + esc(etat.presta.nom) + '</b><br>' + JOURS_LONG[d.getDay()] + ' ' + d.getDate() + ' ' +
     MOIS_LONG[d.getMonth()] + ' à ' + etat.heure.replace(':', 'h') + ' · environ ' + dureeTxt(etat.presta.duree) +
     (etat.presta.prix ? ' · ' + esc(etat.presta.prix) : '') +
+    (domicile() ? '<br>À domicile · supplément ' + esc((etat.config && etat.config.supplementDomicile) || '15 €') : '') +
     '<span class="acompte">Acompte de ' + esc((etat.config && etat.config.acompte) || '10 €') + ' demandé pour confirmer.</span>';
 }
 
@@ -289,6 +314,7 @@ $('form').addEventListener('submit', async ev => {
   const f = ev.target, err = $('erreur'); err.textContent = '';
   if (!f.nom.value.trim()) return err.textContent = 'Merci d\'indiquer votre nom.';
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value.trim())) return err.textContent = 'Merci d\'indiquer un email valide.';
+  if (domicile() && f.adresse.value.trim().length < 8) return err.textContent = 'Merci d\'indiquer votre adresse à Poitiers.';
   if (!f.conditions.checked) return err.textContent = 'Merci d\'accepter les conditions de réservation.';
   $('envoyer').disabled = true; $('envoyer').textContent = 'Envoi…';
   try {
@@ -296,6 +322,7 @@ $('form').addEventListener('submit', async ev => {
       prestation: etat.presta.id, date: etat.date, heure: etat.heure,
       nom: f.nom.value.trim(), email: f.email.value.trim(), telephone: f.telephone.value.trim(),
       message: f.message.value.trim(), siteweb: f.siteweb.value, conditions: f.conditions.checked,
+      lieu: domicile() ? 'domicile' : 'salon', adresse: domicile() ? f.adresse.value.trim() : '',
     });
     const recap = $('recap').innerHTML;
     $('app').innerHTML = '<section class="succes"><div class="rond">✓</div><h2>Demande envoyée</h2>' +
@@ -307,6 +334,24 @@ $('form').addEventListener('submit', async ev => {
     if (/créneau/.test(e.message)) chargerCreneaux();
   }
 });
+
+// ---------- Lieu (salon / domicile) ----------
+function domicile() { const r = document.querySelector('input[name="lieu"]:checked'); return r && r.value === 'domicile'; }
+document.querySelectorAll('input[name="lieu"]').forEach(r => r.addEventListener('change', () => {
+  $('bloc-adresse').hidden = !domicile();
+  if (etat.heure) majRecap();
+}));
+
+// ---------- Boutiques de mèches (à modifier ici) ----------
+const BOUTIQUES = [
+  { nom: "Bel'Ivoire", adresse: '11 place Jean de Berry, 86000 Poitiers', tel: '05 49 61 26 37' },
+  { nom: 'Africa Belle', adresse: '4 rue Victor Hugo, 86000 Poitiers', tel: '06 18 13 52 74' },
+  { nom: 'Ekitrade', adresse: '5 boulevard Jeanne d\'Arc, 86000 Poitiers', tel: '05 49 46 64 25' },
+];
+$('liste-boutiques').innerHTML = BOUTIQUES.map(b =>
+  '<li><span class="ic">📍</span><div><b>' + esc(b.nom) + '</b><span class="t">' +
+  '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(b.nom + ' ' + b.adresse) + '" target="_blank" rel="noopener">' + esc(b.adresse) + '</a>' +
+  (b.tel ? ' · <a href="tel:' + b.tel.replace(/\s/g, '') + '">' + esc(b.tel) + '</a>' : '') + '</span></div></li>').join('');
 
 init();
 </script>

@@ -27,6 +27,7 @@
     <h1><?= rdv.prestation ?> — <?= rdv.nom ?></h1>
     <div class="quand"><?= rdv.quand ?></div>
     <dl>
+      <dt>Lieu</dt><dd><?= rdv.lieu ?></dd>
       <dt>Email</dt><dd><?= rdv.email ?></dd>
       <? if (rdv.telephone) { ?><dt>Téléphone</dt><dd><?= rdv.telephone ?></dd><? } ?>
       <? if (rdv.message) { ?><dt>Message</dt><dd><?= rdv.message ?></dd><? } ?>
