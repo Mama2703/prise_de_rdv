@@ -8,7 +8,6 @@ Il te demande ton identifiant Apple et un mot de passe pour app
 Rien n'est enregistré : le script affiche juste la liste des calendriers et leur URL.
 """
 import base64
-import getpass
 import sys
 import urllib.error
 import urllib.request
@@ -44,7 +43,9 @@ def href(arbre, chemin):
 
 def main():
     ident = input("Identifiant Apple (email) : ").strip()
-    mdp = getpass.getpass("Mot de passe pour app (xxxx-xxxx-xxxx-xxxx) : ").strip()
+    # Saisie visible : la saisie masquée ne fonctionne pas dans certaines applis iPhone (a-Shell).
+    print("Colle ou tape le mot de passe pour app (il s'affiche, c'est normal) :")
+    mdp = input("> ").strip().replace(" ", "")
     auth = "Basic " + base64.b64encode(f"{ident}:{mdp}".encode()).decode()
 
     # 1. Principal de l'utilisateur
