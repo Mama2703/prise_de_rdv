@@ -22,16 +22,15 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--fond); color: var(--texte); font: 16px/1.5 Inter, system-ui, sans-serif; }
-  .bandeau { background: var(--entete); color: var(--entete-texte); text-align: center; padding: 40px 16px 56px; position: relative; overflow: hidden; }
+  .bandeau { background: var(--entete); color: var(--entete-texte); text-align: center; padding: 26px 16px 48px; position: relative; overflow: hidden; }
   .bandeau::before, .bandeau::after { content: "✿"; position: absolute; font-size: 90px; opacity: .13; line-height: 1; }
   .bandeau::before { top: -14px; left: -10px; } .bandeau::after { bottom: -10px; right: -6px; font-size: 120px; }
-  .bandeau .script { font-family: "Great Vibes", cursive; font-size: 42px; line-height: 1.1; margin: 0; font-weight: 400; }
+  .bandeau .script { font-family: "Great Vibes", cursive; font-size: 38px; line-height: 1.1; margin: 0; font-weight: 400; }
   .bandeau .titre { font-family: "Josefin Sans", sans-serif; font-weight: 300; letter-spacing: .32em; text-transform: uppercase; font-size: 15px; margin: 14px 0 0; }
   .bandeau .infos { font-family: "Josefin Sans", sans-serif; font-size: 14px; margin-top: 14px; opacity: .9; letter-spacing: .04em; }
   main { max-width: 560px; margin: -28px auto 0; padding: 0 16px 48px; position: relative; }
   header p { margin: 0 0 16px; color: var(--doux); }
   section { background: var(--carte); border: 1px solid var(--bord); border-radius: 18px; padding: 20px; margin-bottom: 14px; }
-  section.verrou { opacity: .45; pointer-events: none; }
   h2 { font-family: "Josefin Sans", sans-serif; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: var(--doux); margin: 0 0 14px; display: flex; gap: 8px; align-items: center; }
   h2 .num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent-doux); color: var(--accent); display: grid; place-items: center; font-size: 12px; }
   .prestas { display: grid; gap: 8px; }
@@ -83,6 +82,36 @@
   .lieu b { display: block; font-weight: 600; } .lieu small { color: var(--doux); }
   .boutiques li { align-items: flex-start; }
   .recap .acompte { display: block; margin-top: 6px; font-size: 14px; color: var(--doux); }
+  .essentiels { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .ess { background: var(--carte); border: 1px solid var(--bord); border-radius: 14px; padding: 10px 12px; font-size: 13px; line-height: 1.35; color: var(--doux); text-decoration: none; display: block; }
+  .ess b { display: block; color: var(--texte); font-size: 14px; margin-bottom: 1px; }
+  .ess .e { font-size: 18px; display: block; margin-bottom: 4px; }
+  a.ess { color: var(--doux); } a.ess u { color: var(--accent); }
+  details.plie { background: var(--carte); border: 1px solid var(--bord); border-radius: 18px; margin-bottom: 14px; }
+  details.plie > summary { list-style: none; cursor: pointer; padding: 18px 20px; font-family: "Josefin Sans", sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; font-size: 14px; color: var(--doux); display: flex; justify-content: space-between; align-items: center; }
+  details.plie > summary::-webkit-details-marker { display: none; }
+  details.plie > summary::after { content: "+"; font-size: 22px; color: var(--accent); font-weight: 400; }
+  details.plie[open] > summary::after { content: "–"; }
+  details.plie > .contenu { padding: 0 20px 20px; }
+  .recap .meches { display: block; margin-top: 6px; font-size: 14px; color: var(--doux); }
+  .recap .meches a { color: var(--accent); font-weight: 600; }
+  .fini { text-align: left; }
+  .fini .tete { text-align: center; margin-bottom: 18px; }
+  .rond-ok { width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 26px; margin: 0 auto 8px; }
+  .fini .tete h2 { justify-content: center; font-size: 34px; text-transform: none; letter-spacing: 0; color: var(--texte); font-family: "Great Vibes", cursive; font-weight: 400; margin: 0; }
+  .fini .tete p { margin: 2px 0 0; color: var(--doux); }
+  .etape-wero { border: 2px solid var(--accent); background: var(--accent-doux); border-radius: 16px; padding: 16px; }
+  .etape-wero .badge { display: inline-block; background: var(--accent); color: #fff; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; }
+  .etape-wero h3 { margin: 10px 0 4px; font-size: 19px; }
+  .etape-wero .num-wero { font-size: 28px; font-weight: 700; letter-spacing: .03em; color: var(--accent); margin: 8px 0 2px; }
+  .etape-wero .msg-wero { background: var(--carte); border-radius: 10px; padding: 8px 12px; font-size: 15px; margin-top: 10px; }
+  .copier { all: unset; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent); border: 1.5px solid var(--accent); border-radius: 99px; padding: 6px 14px; margin-top: 8px; display: inline-block; }
+  .copier:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .ensuite { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; font-size: 15px; }
+  .ensuite li { display: flex; gap: 10px; }
+  .ensuite .n { flex: 0 0 26px; height: 26px; border-radius: 50%; background: var(--accent-doux); color: var(--accent); font-weight: 600; font-size: 13px; display: grid; place-items: center; }
+  .ensuite a { color: var(--accent); font-weight: 600; }
+  .petit-recap { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--bord); font-size: 14px; color: var(--doux); }
   footer { text-align: center; color: var(--doux); font-size: 14px; padding: 8px 16px 40px; font-family: "Josefin Sans", sans-serif; }
   footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
   footer .ligne { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 8px; }
@@ -97,20 +126,27 @@
 <main>
   <div id="demo" class="demo" hidden>Mode démo : aucune demande n'est réellement envoyée. Les réservations seront bientôt ouvertes.</div>
 
+  <div class="essentiels" aria-label="L'essentiel">
+    <div class="ess"><span class="e">📅</span><b>Sam. et dim. · 9 h–16 h</b>Réservez au moins 48 h avant</div>
+    <div class="ess"><span class="e">💶</span><b>Acompte 10 € par Wero</b>Pour confirmer le rendez-vous</div>
+    <a class="ess" href="#boutiques" data-ouvrir="boutiques"><span class="e">🛍️</span><b>Mèches à apporter</b><u>Où les acheter ?</u></a>
+    <div class="ess"><span class="e">🚗</span><b>À domicile possible</b>Dans Poitiers, +15 €</div>
+  </div>
+
   <div id="app">
     <section id="s1">
       <h2><span class="num">1</span>Prestation</h2>
       <div class="prestas" id="prestas"><span class="chargement">Chargement…</span></div>
     </section>
 
-    <section id="s2" class="verrou">
+    <section id="s2" hidden>
       <h2><span class="num">2</span>Date et heure</h2>
       <div class="jours" id="jours" role="group" aria-label="Jours"></div>
       <div class="creneaux" id="creneaux" role="group" aria-label="Créneaux"></div>
       <p class="vide" id="info-creneaux">Choisissez un jour.</p>
     </section>
 
-    <section id="s3" class="verrou">
+    <section id="s3" hidden>
       <h2><span class="num">3</span>Vos coordonnées</h2>
       <form id="form" novalidate>
         <div class="label-groupe">Lieu du rendez-vous</div>
@@ -139,24 +175,24 @@
       </form>
     </section>
   </div>
-  <section class="infos-pratiques" aria-labelledby="titre-infos">
-    <h2 id="titre-infos">Bon à savoir</h2>
-    <ul>
+  <details class="plie infos-pratiques" id="infos">
+    <summary>Toutes les infos pratiques</summary>
+    <div class="contenu"><ul>
       <li><span class="ic">📅</span><div><b>Réservation 48 h à l'avance</b><span class="t">Rendez-vous le samedi et le dimanche, de 9 h à 16 h (heure de début).</span></div></li>
       <li><span class="ic">💶</span><div><b>Acompte de 10 € par Wero</b><span class="t">À envoyer au 07 52 34 16 52 depuis l'appli de votre banque pour confirmer le rendez-vous. Déduit du prix, non remboursable en cas d'annulation moins de 24 h avant.</span></div></li>
-      <li><span class="ic">🛍️</span><div><b>Mèches non fournies</b><span class="t">Elles sont à acheter avant le rendez-vous. Voir les boutiques ci-dessous.</span></div></li>
+      <li><span class="ic">🛍️</span><div><b>Mèches non fournies</b><span class="t">Elles sont à acheter avant le rendez-vous. <a href="#boutiques" data-ouvrir="boutiques">Voir les boutiques</a>.</span></div></li>
       <li><span class="ic">🚗</span><div><b>À domicile dans Poitiers</b><span class="t">Je me déplace chez vous pour un supplément de 15 €.</span></div></li>
       <li><span class="ic">✨</span><div><b>Préparation</b><span class="t">Venez les cheveux propres, démêlés et sans produit.</span></div></li>
       <li><span class="ic">⏱️</span><div><b>Durées indicatives</b><span class="t">Elles varient selon la longueur, l'épaisseur et le modèle choisi.</span></div></li>
       <li><span class="ic">📸</span><div><b>Une idée de modèle ?</b><span class="t">Décrivez-la dans le message ou envoyez une photo sur Instagram <a href="https://www.instagram.com/naboo__dioum/" target="_blank" rel="noopener">@naboo__dioum</a>.</span></div></li>
-    </ul>
-  </section>
+    </ul></div>
+  </details>
 
-  <section class="infos-pratiques boutiques" aria-labelledby="titre-boutiques">
-    <h2 id="titre-boutiques">Où acheter vos mèches à Poitiers</h2>
-    <ul id="liste-boutiques"></ul>
-    <p class="vide">Pensez à appeler avant de vous déplacer pour vérifier le stock. Un doute sur la quantité ou la couleur ? Demandez-moi sur Instagram.</p>
-  </section>
+  <details class="plie infos-pratiques boutiques" id="boutiques">
+    <summary>Où acheter vos mèches</summary>
+    <div class="contenu"><ul id="liste-boutiques"></ul>
+    <p class="vide">Pensez à appeler avant de vous déplacer pour vérifier le stock. Un doute sur la quantité ou la couleur ? Demandez-moi sur Instagram.</p></div>
+  </details>
 
 </main>
 <footer>
@@ -241,8 +277,9 @@ async function init() {
       const b = bouton('', '<span class="presta-nom">' + esc(p.nom) + '</span><span class="presta-droite">' +
         (p.prix ? '<b>' + esc(p.prix) + '</b>' : '') + '<small>environ ' + dureeTxt(p.duree) + '</small></span>', () => {
         selectionne(c, b); etat.presta = p; etat.heure = null;
-        $('s2').classList.remove('verrou'); $('s3').classList.add('verrou');
+        $('s2').hidden = false; $('s3').hidden = true;
         if (etat.date) chargerCreneaux(); else afficherJours();
+        $('s2').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
       c.appendChild(b);
     });
@@ -264,7 +301,7 @@ function afficherJours() {
     const b = bouton('jour', '<span class="js">' + JOURS[d.getDay()] + '</span><span class="jn">' + d.getDate() +
       '</span><span class="jm">' + MOIS[d.getMonth()] + '</span>', () => {
       selectionne(c, b); etat.date = iso(d); etat.dateObj = d; etat.heure = null;
-      $('s3').classList.add('verrou'); chargerCreneaux();
+      $('s3').hidden = true; chargerCreneaux();
     });
     b.setAttribute('aria-label', JOURS_LONG[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS_LONG[d.getMonth()]);
     if (!ouvert) b.disabled = true;
@@ -290,7 +327,7 @@ async function chargerCreneaux() {
     creneaux.forEach(h => {
       const b = bouton('creneau', h.replace(':', 'h'), () => {
         selectionne(c, b); etat.heure = h;
-        $('s3').classList.remove('verrou'); majRecap();
+        $('s3').hidden = false; majRecap();
         $('s3').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
       c.appendChild(b);
@@ -307,7 +344,8 @@ function majRecap() {
     (etat.presta.prix ? ' · ' + esc(etat.presta.prix) : '') +
     (domicile() ? '<br>À domicile · supplément ' + esc((etat.config && etat.config.supplementDomicile) || '15 €') : '') +
     '<span class="acompte">Acompte de ' + esc((etat.config && etat.config.acompte) || '10 €') + ' à envoyer par Wero au ' +
-    esc((etat.config && etat.config.wero) || '07 52 34 16 52') + ' pour confirmer.</span>';
+    esc((etat.config && etat.config.wero) || '07 52 34 16 52') + ' pour confirmer.</span>' +
+    '<span class="meches">🛍️ Mèches non fournies : <a href="#boutiques" data-ouvrir="boutiques">où les acheter ?</a></span>';
 }
 
 $('form').addEventListener('submit', async ev => {
@@ -325,16 +363,68 @@ $('form').addEventListener('submit', async ev => {
       message: f.message.value.trim(), siteweb: f.siteweb.value, conditions: f.conditions.checked,
       lieu: domicile() ? 'domicile' : 'salon', adresse: domicile() ? f.adresse.value.trim() : '',
     });
-    const recap = $('recap').innerHTML;
-    $('app').innerHTML = '<section class="succes"><div class="rond">✓</div><h2>Demande envoyée</h2>' +
-      '<p>' + recap + '</p><p style="color:var(--doux)"><b>Dernière étape :</b> envoyez l\'acompte de 10 € par <b>Wero</b> au <b>07 52 34 16 52</b> (depuis l\'appli de votre banque), ' +
-      'avec en message « Acompte ' + esc(f.nom.value.trim()) + ' ». Votre rendez-vous sera confirmé par email dès sa réception.</p></section>';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    afficherFin(f.nom.value.trim(), f.email.value.trim());
   } catch (e) {
     err.textContent = e.message;
     $('envoyer').disabled = false; $('envoyer').textContent = 'Envoyer la demande';
     if (/créneau/.test(e.message)) chargerCreneaux();
   }
+});
+
+// ---------- Écran de fin : la dernière étape (acompte) bien visible ----------
+function afficherFin(nom, email) {
+  const cfg = etat.config || {};
+  const numero = cfg.wero || '07 52 34 16 52';
+  const acompte = cfg.acompte || '10 €';
+  const d = etat.dateObj;
+  const msg = 'Acompte ' + nom + ' ' + String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+  const recap = esc(etat.presta.nom) + ' · ' + JOURS_LONG[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS_LONG[d.getMonth()] +
+    ' à ' + etat.heure.replace(':', 'h') + (domicile() ? ' · à domicile' : '');
+  $('app').innerHTML =
+    '<section class="fini" id="fini">' +
+      '<div class="tete"><div class="rond-ok" aria-hidden="true">✓</div><h2>Demande envoyée</h2>' +
+      '<p>Il reste une étape pour confirmer votre rendez-vous.</p></div>' +
+      '<div class="etape-wero">' +
+        '<span class="badge">Dernière étape</span>' +
+        '<h3>Envoyez l\'acompte de ' + esc(acompte) + ' par Wero</h3>' +
+        '<div>Depuis l\'appli de votre banque, au numéro :</div>' +
+        '<div class="num-wero">' + esc(numero) + '</div>' +
+        '<button class="copier" type="button" data-copier="' + esc(numero.replace(/\s/g, '')) + '">Copier le numéro</button>' +
+        '<div class="msg-wero">Message à indiquer : <b>' + esc(msg) + '</b></div>' +
+        '<button class="copier" type="button" data-copier="' + esc(msg) + '">Copier le message</button>' +
+      '</div>' +
+      '<ol class="ensuite">' +
+        '<li><span class="n">1</span><span>Dès réception de l\'acompte, vous recevez la <b>confirmation par email</b>' + (email ? ' (' + esc(email) + ')' : '') + '.</span></li>' +
+        '<li><span class="n">2</span><span>Achetez vos <b>mèches</b> avant le rendez-vous (non fournies). <a href="#boutiques" data-ouvrir="boutiques">Où les acheter ?</a></span></li>' +
+        '<li><span class="n">3</span><span>Venez les cheveux <b>propres, démêlés et sans produit</b>.</span></li>' +
+      '</ol>' +
+      '<div class="petit-recap">' + recap + '<br>Acompte non remboursable en cas d\'annulation moins de 24 h avant.</div>' +
+    '</section>';
+  $('fini').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Boutons « Copier »
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-copier]');
+  if (!b) return;
+  const texte = b.getAttribute('data-copier');
+  try { await navigator.clipboard.writeText(texte); }
+  catch (_) {
+    const t = document.createElement('textarea'); t.value = texte; document.body.appendChild(t);
+    t.select(); try { document.execCommand('copy'); } catch (__) {} t.remove();
+  }
+  const ancien = b.textContent; b.textContent = 'Copié ✓';
+  setTimeout(() => { b.textContent = ancien; }, 1800);
+});
+
+// Liens « Où acheter ? » : ouvrent la rubrique repliée et y descendent
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-ouvrir]');
+  if (!a) return;
+  e.preventDefault();
+  const cible = $(a.getAttribute('data-ouvrir'));
+  cible.open = true;
+  cible.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 // ---------- Lieu (salon / domicile) ----------
