@@ -26,15 +26,20 @@ const CONFIG = {
   ],
 
   // Horaires d'ouverture : 1 = lundi ... 7 = dimanche (week-ends uniquement)
+  // Ici : heures de DÉBUT possibles (10h à 16h). Mettre DEBUT_SEULEMENT à false
+  // si la prestation doit aussi être terminée avant l'heure de fin.
   HORAIRES: {
     1: [], 2: [], 3: [], 4: [], 5: [],
-    6: [['09:00', '19:00']],
-    7: [['09:00', '19:00']],
+    6: [['10:00', '16:00']],
+    7: [['10:00', '16:00']],
   },
+  DEBUT_SEULEMENT: true,
+
+  ACOMPTE: '10 €',           // acompte demandé pour confirmer le RDV
 
   JOURS_FERMES: [],          // ex. ['2026-12-26', '2026-12-27'] (congés)
   PAS_CRENEAUX: 60,          // un créneau toutes les heures
-  DELAI_MIN_HEURES: 24,      // pas de réservation à moins de 24 h
+  DELAI_MIN_HEURES: 48,      // réservation au moins 48 h à l'avance
   JOURS_MAX_A_L_AVANCE: 45,
   RAPPEL_MINUTES: 60,        // alerte dans ton agenda 60 min avant (0 = aucune)
   LIEU: 'Poitiers (86000)',  // adresse affichée dans l'événement
@@ -86,6 +91,7 @@ function doPost(e) {
     const message = nettoie_(d.message, 1000);
     if (!nom) throw new Error('Le nom est obligatoire.');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Email invalide.');
+    if (d.conditions !== true) throw new Error('Merci d\'accepter les conditions de réservation.');
 
     lock.waitLock(20000);
     // Revérifie que le créneau est toujours libre (deux clients en même temps)
@@ -115,6 +121,7 @@ function doPost(e) {
         '<li>' + esc_(quand) + '</li>' +
         '<li>' + esc_(email) + (tel ? ' — ' + esc_(tel) : '') + '</li></ul>' +
         (message ? '<p>Message : ' + esc_(message) + '</p>' : '') +
+        '<p>Pense à demander l\'acompte de ' + CONFIG.ACOMPTE + ' avant de valider.</p>' +
         '<p><a href="' + lien + '" style="background:#1f6f5c;color:#fff;padding:10px 16px;' +
         'border-radius:8px;text-decoration:none">Examiner la demande</a></p>',
     });
@@ -127,7 +134,10 @@ function doPost(e) {
       htmlBody:
         '<p>Bonjour ' + esc_(nom) + ',</p>' +
         '<p>Votre demande pour <b>' + esc_(presta.nom) + '</b> le <b>' + esc_(quand) +
-        '</b> a bien été reçue. Vous recevrez un email dès qu\'elle sera confirmée.</p>' +
+        '</b> a bien été reçue.</p>' +
+        '<p>Pour confirmer votre rendez-vous, un <b>acompte de ' + CONFIG.ACOMPTE + '</b> vous sera demandé. ' +
+        'Il est déduit du prix de la prestation et n\'est pas remboursable en cas d\'annulation moins de 24 h avant. ' +
+        'Vous recevrez un email de confirmation dès réception.</p>' +
         '<p>' + esc_(CONFIG.NOM_ACTIVITE) + '</p>',
     });
 
@@ -170,6 +180,8 @@ function decider(id, token, decision) {
           '<p>Bonjour ' + esc_(rdv.nom) + ',</p>' +
           '<p>Votre rendez-vous <b>' + esc_(rdv.prestation) + '</b> est confirmé pour le <b>' +
           esc_(quand) + '</b>.' + (CONFIG.LIEU ? '<br>Lieu : ' + esc_(CONFIG.LIEU) : '') + '</p>' +
+          '<p>Merci de venir avec les cheveux propres, démêlés et sans produit. ' +
+          'Rappel : l\'acompte n\'est pas remboursable en cas d\'annulation moins de 24 h avant le rendez-vous.</p>' +
           '<p>Vous pouvez l\'ajouter à votre agenda avec le fichier joint.</p>' +
           '<p>' + esc_(CONFIG.NOM_ACTIVITE) + '</p>',
         attachments: [Utilities.newBlob(construireIcs_(uid, debut, fin, rdv, false),
@@ -263,7 +275,8 @@ function creneauxLibres_(dateStr, prestationId) {
 
   plages.forEach(([ouv, ferm]) => {
     const finPlage = dateParis_(dateStr, ferm).getTime();
-    for (let t = dateParis_(dateStr, ouv).getTime(); t + duree <= finPlage; t += CONFIG.PAS_CRENEAUX * 60000) {
+    const dernierDebut = CONFIG.DEBUT_SEULEMENT ? finPlage : finPlage - duree;
+    for (let t = dateParis_(dateStr, ouv).getTime(); t <= dernierDebut; t += CONFIG.PAS_CRENEAUX * 60000) {
       if (t < minDebut || t > maxDebut) continue;
       const chevauche = occupes.some(o => t < o.fin && t + duree > o.debut);
       if (!chevauche) res.push(Utilities.formatDate(new Date(t), CONFIG.FUSEAU, 'HH:mm'));
@@ -289,6 +302,10 @@ function configPublique_() {
     joursOuverts: jours,
     joursFermes: CONFIG.JOURS_FERMES,
     joursMax: CONFIG.JOURS_MAX_A_L_AVANCE,
+    acompte: CONFIG.ACOMPTE,
+    delaiHeures: CONFIG.DELAI_MIN_HEURES,
+    // heure de début la plus tardive possible, tous jours confondus (sert à griser les jours trop proches)
+    dernierDebut: Object.keys(CONFIG.HORAIRES).reduce((m, k) => CONFIG.HORAIRES[k].reduce((mm, r) => r[1] > mm ? r[1] : mm, m), '00:00'),
   };
 }
 

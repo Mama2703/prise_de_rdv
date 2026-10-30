@@ -67,6 +67,15 @@
   .presta-nom { font-weight: 500; }
   .presta-droite { text-align: right; white-space: nowrap; }
   .presta-droite b { display: block; color: var(--accent); font-weight: 600; }
+  .infos-pratiques ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+  .infos-pratiques li { display: flex; gap: 12px; font-size: 15px; }
+  .infos-pratiques .ic { flex: 0 0 32px; height: 32px; border-radius: 50%; background: var(--accent-doux); display: grid; place-items: center; font-size: 15px; }
+  .infos-pratiques b { display: block; }
+  .infos-pratiques a { color: var(--accent); font-weight: 600; }
+  .infos-pratiques span.t { color: var(--doux); font-size: 14px; }
+  .case { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; font-size: 14px; font-weight: 400; cursor: pointer; }
+  .case input { width: 20px; height: 20px; flex: 0 0 20px; margin: 1px 0 0; accent-color: var(--accent); }
+  .recap .acompte { display: block; margin-top: 6px; font-size: 14px; color: var(--doux); }
   footer { text-align: center; color: var(--doux); font-size: 14px; padding: 8px 16px 40px; font-family: "Josefin Sans", sans-serif; }
   footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
   footer .ligne { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 8px; }
@@ -80,6 +89,17 @@
 </div>
 <main>
   <div id="demo" class="demo" hidden>Mode démo : aucune demande n'est réellement envoyée. Les réservations seront bientôt ouvertes.</div>
+
+  <section class="infos-pratiques" aria-labelledby="titre-infos">
+    <h2 id="titre-infos">Bon à savoir</h2>
+    <ul>
+      <li><span class="ic">📅</span><div><b>Réservation 48 h à l'avance</b><span class="t">Rendez-vous le samedi et le dimanche, à partir de 10 h (dernier début à 16 h).</span></div></li>
+      <li><span class="ic">💶</span><div><b>Acompte de 10 €</b><span class="t">Demandé pour confirmer le rendez-vous et déduit du prix. Non remboursable en cas d'annulation moins de 24 h avant.</span></div></li>
+      <li><span class="ic">✨</span><div><b>Préparation</b><span class="t">Venez les cheveux propres, démêlés et sans produit.</span></div></li>
+      <li><span class="ic">⏱️</span><div><b>Durées indicatives</b><span class="t">Elles varient selon la longueur, l'épaisseur et le modèle choisi.</span></div></li>
+      <li><span class="ic">📸</span><div><b>Une idée de modèle ?</b><span class="t">Décrivez-la dans le message ou envoyez une photo sur Instagram <a href="https://www.instagram.com/naboo__dioum/" target="_blank" rel="noopener">@naboo__dioum</a>.</span></div></li>
+    </ul>
+  </section>
 
   <div id="app">
     <section id="s1">
@@ -104,9 +124,10 @@
         <label for="telephone">Téléphone <small>(facultatif)</small></label>
         <input id="telephone" name="telephone" type="tel" autocomplete="tel" maxlength="30">
         <label for="message">Message <small>(facultatif)</small></label>
-        <textarea id="message" name="message" maxlength="1000"></textarea>
+        <textarea id="message" name="message" maxlength="1000" placeholder="Modèle souhaité, longueur, couleur…"></textarea>
         <input class="piege" name="siteweb" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="recap" id="recap"></div>
+        <label class="case"><input type="checkbox" id="conditions" name="conditions"> <span>J'ai lu les conditions : acompte de 10 € pour confirmer, non remboursable en cas d'annulation moins de 24 h avant le rendez-vous.</span></label>
         <button class="envoyer" id="envoyer" type="submit">Envoyer la demande</button>
         <div class="erreur" id="erreur" role="alert"></div>
         <p class="rgpd">Vos informations servent uniquement à gérer votre rendez-vous.</p>
@@ -162,11 +183,13 @@ const pause = ms => new Promise(r => setTimeout(r, ms));
 async function demo(p) {
   await pause(250);
   if (p.action === 'config') return { ok: true, config: {
-    nom: 'Naboo', prestations: DEMO_PRESTAS, joursOuverts: [6, 7], joursFermes: [], joursMax: 45 } };
+    nom: 'Naboo', prestations: DEMO_PRESTAS, joursOuverts: [6, 7], joursFermes: [], joursMax: 45, acompte: '10 €', delaiHeures: 48, dernierDebut: '16:00' } };
   // Créneaux fictifs : 9h-19h, toutes les heures, selon la durée de la prestation
   const duree = (DEMO_PRESTAS.find(x => x.id === p.prestation) || { duree: 60 }).duree;
   const res = [];
-  for (let h = 9; h * 60 + duree <= 19 * 60; h++) res.push(String(h).padStart(2, '0') + ':00');
+  for (let h = 10; h <= 16; h++) res.push(String(h).padStart(2, '0') + ':00');
+  const lim = Date.now() + 48 * 3600000;
+  if (new Date(p.date + 'T10:00:00') < lim) return { ok: true, creneaux: [] };
   return { ok: true, creneaux: res };
 }
 
@@ -211,7 +234,9 @@ function afficherJours() {
   for (let i = 0; i <= cfg.joursMax; i++) {
     const d = new Date(auj); d.setDate(auj.getDate() + i);
     const jIso = d.getDay() === 0 ? 7 : d.getDay();
-    const ouvert = cfg.joursOuverts.includes(jIso) && !cfg.joursFermes.includes(iso(d));
+    const finJour = new Date(d); const [hh, mm] = (cfg.dernierDebut || '23:59').split(':').map(Number); finJour.setHours(hh, mm);
+    const tropTot = finJour.getTime() < Date.now() + (cfg.delaiHeures || 0) * 3600000;
+    const ouvert = cfg.joursOuverts.includes(jIso) && !cfg.joursFermes.includes(iso(d)) && !tropTot;
     const b = bouton('jour', '<span class="js">' + JOURS[d.getDay()] + '</span><span class="jn">' + d.getDate() +
       '</span><span class="jm">' + MOIS[d.getMonth()] + '</span>', () => {
       selectionne(c, b); etat.date = iso(d); etat.dateObj = d; etat.heure = null;
@@ -222,6 +247,9 @@ function afficherJours() {
     if (etat.date === iso(d)) b.setAttribute('aria-pressed', 'true');
     c.appendChild(b);
   }
+  // Fait défiler la bande jusqu'au premier jour réservable
+  const premier = c.querySelector('.jour:not([disabled])');
+  if (premier) c.scrollLeft = premier.offsetLeft - c.offsetLeft;
 }
 
 async function chargerCreneaux() {
@@ -251,7 +279,9 @@ async function chargerCreneaux() {
 function majRecap() {
   const d = etat.dateObj;
   $('recap').innerHTML = '<b>' + esc(etat.presta.nom) + '</b><br>' + JOURS_LONG[d.getDay()] + ' ' + d.getDate() + ' ' +
-    MOIS_LONG[d.getMonth()] + ' à ' + etat.heure.replace(':', 'h') + ' · ' + dureeTxt(etat.presta.duree);
+    MOIS_LONG[d.getMonth()] + ' à ' + etat.heure.replace(':', 'h') + ' · environ ' + dureeTxt(etat.presta.duree) +
+    (etat.presta.prix ? ' · ' + esc(etat.presta.prix) : '') +
+    '<span class="acompte">Acompte de ' + esc((etat.config && etat.config.acompte) || '10 €') + ' demandé pour confirmer.</span>';
 }
 
 $('form').addEventListener('submit', async ev => {
@@ -259,16 +289,17 @@ $('form').addEventListener('submit', async ev => {
   const f = ev.target, err = $('erreur'); err.textContent = '';
   if (!f.nom.value.trim()) return err.textContent = 'Merci d\'indiquer votre nom.';
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value.trim())) return err.textContent = 'Merci d\'indiquer un email valide.';
+  if (!f.conditions.checked) return err.textContent = 'Merci d\'accepter les conditions de réservation.';
   $('envoyer').disabled = true; $('envoyer').textContent = 'Envoi…';
   try {
     await envoyer({
       prestation: etat.presta.id, date: etat.date, heure: etat.heure,
       nom: f.nom.value.trim(), email: f.email.value.trim(), telephone: f.telephone.value.trim(),
-      message: f.message.value.trim(), siteweb: f.siteweb.value,
+      message: f.message.value.trim(), siteweb: f.siteweb.value, conditions: f.conditions.checked,
     });
     const recap = $('recap').innerHTML;
     $('app').innerHTML = '<section class="succes"><div class="rond">✓</div><h2>Demande envoyée</h2>' +
-      '<p>' + recap + '</p><p style="color:var(--doux)">Vous recevrez un email de confirmation dès que le rendez-vous sera validé.</p></section>';
+      '<p>' + recap + '</p><p style="color:var(--doux)">Naboo va vous recontacter pour l\'acompte de 10 €. Votre rendez-vous sera confirmé par email dès sa réception.</p></section>';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (e) {
     err.textContent = e.message;
