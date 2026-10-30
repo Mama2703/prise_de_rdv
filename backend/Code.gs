@@ -13,33 +13,31 @@
 // ============================== CONFIGURATION ==============================
 
 const CONFIG = {
-  NOM_ACTIVITE: 'Mon activité',
+  NOM_ACTIVITE: 'Naboo',
   FUSEAU: 'Europe/Paris',
 
-  // Prestations proposées (durée en minutes)
+  // Prestations proposées (durée en minutes) — DURÉES À AJUSTER
   PRESTATIONS: [
-    { id: 'p1', nom: 'Prestation courte', duree: 30, prix: '' },
-    { id: 'p2', nom: 'Prestation standard', duree: 60, prix: '' },
-    { id: 'p3', nom: 'Prestation longue', duree: 120, prix: '' },
+    { id: 'braids', nom: 'Braids', duree: 300, prix: '40 €' },
+    { id: 'crochet-locks', nom: 'Crochet Locks', duree: 180, prix: '45 €' },
+    { id: 'twist', nom: 'Twist', duree: 240, prix: '45 €' },
+    { id: 'nattes-collees', nom: 'Nattes Collées', duree: 120, prix: '30 €' },
+    { id: 'tissage-ouvert', nom: 'Tissage Ouvert', duree: 180, prix: '50 €' },
   ],
 
-  // Horaires d'ouverture : 1 = lundi ... 7 = dimanche
+  // Horaires d'ouverture : 1 = lundi ... 7 = dimanche (week-ends uniquement)
   HORAIRES: {
-    1: [['09:00', '12:00'], ['14:00', '18:00']],
-    2: [['09:00', '12:00'], ['14:00', '18:00']],
-    3: [['09:00', '12:00']],
-    4: [['09:00', '12:00'], ['14:00', '18:00']],
-    5: [['09:00', '12:00'], ['14:00', '18:00']],
-    6: [['10:00', '16:00']],
-    7: [],
+    1: [], 2: [], 3: [], 4: [], 5: [],
+    6: [['09:00', '19:00']],
+    7: [['09:00', '19:00']],
   },
 
-  JOURS_FERMES: [],          // ex. ['2026-12-24', '2026-12-25']
-  PAS_CRENEAUX: 30,          // un créneau toutes les 30 min
-  DELAI_MIN_HEURES: 12,      // pas de réservation à moins de 12 h
-  JOURS_MAX_A_L_AVANCE: 30,
+  JOURS_FERMES: [],          // ex. ['2026-12-26', '2026-12-27'] (congés)
+  PAS_CRENEAUX: 60,          // un créneau toutes les heures
+  DELAI_MIN_HEURES: 24,      // pas de réservation à moins de 24 h
+  JOURS_MAX_A_L_AVANCE: 45,
   RAPPEL_MINUTES: 60,        // alerte dans ton agenda 60 min avant (0 = aucune)
-  LIEU: '',                  // adresse affichée dans l'événement
+  LIEU: 'Poitiers (86000)',  // adresse affichée dans l'événement
 };
 
 const FEUILLE = 'Rendez-vous';
