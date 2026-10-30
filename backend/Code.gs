@@ -37,6 +37,7 @@ const CONFIG = {
 
   ACOMPTE: '10 €',           // acompte demandé pour confirmer le RDV
   SUPPLEMENT_DOMICILE: '15 €', // déplacement à domicile dans Poitiers
+  WERO_NUMERO: '07 52 34 16 52', // numéro sur lequel recevoir l'acompte par Wero
 
   JOURS_FERMES: [],          // ex. ['2026-12-26', '2026-12-27'] (congés)
   PAS_CRENEAUX: 60,          // un créneau toutes les heures
@@ -128,7 +129,8 @@ function doPost(e) {
         '<li>' + esc_(lieuTxt) + '</li>' +
         '<li>' + esc_(email) + (tel ? ' — ' + esc_(tel) : '') + '</li></ul>' +
         (message ? '<p>Message : ' + esc_(message) + '</p>' : '') +
-        '<p>Pense à demander l\'acompte de ' + CONFIG.ACOMPTE + ' avant de valider.</p>' +
+        '<p>Vérifie que l\'acompte de ' + CONFIG.ACOMPTE + ' est bien arrivé sur Wero avant de valider ' +
+        '(message attendu : « Acompte ' + esc_(nom) + ' ' + esc_(Utilities.formatDate(debut, CONFIG.FUSEAU, 'dd/MM')) + ' »).</p>' +
         '<p><a href="' + lien + '" style="background:#1f6f5c;color:#fff;padding:10px 16px;' +
         'border-radius:8px;text-decoration:none">Examiner la demande</a></p>',
     });
@@ -143,8 +145,10 @@ function doPost(e) {
         '<p>Votre demande pour <b>' + esc_(presta.nom) + '</b> le <b>' + esc_(quand) +
         '</b> a bien été reçue.<br>Lieu : ' + esc_(lieuTxt) + '</p>' +
         '<p>Pensez à acheter vos mèches avant le rendez-vous : elles ne sont pas fournies.</p>' +
-        '<p>Pour confirmer votre rendez-vous, un <b>acompte de ' + CONFIG.ACOMPTE + '</b> vous sera demandé. ' +
-        'Il est déduit du prix de la prestation et n\'est pas remboursable en cas d\'annulation moins de 24 h avant. ' +
+        '<p><b>Pour confirmer votre rendez-vous</b>, envoyez un <b>acompte de ' + CONFIG.ACOMPTE + '</b> par <b>Wero</b> ' +
+        '(depuis l\'appli de votre banque) au <b>' + CONFIG.WERO_NUMERO + '</b>, avec en message : ' +
+        '« Acompte ' + esc_(nom) + ' ' + esc_(Utilities.formatDate(debut, CONFIG.FUSEAU, 'dd/MM')) + ' ».</p>' +
+        '<p>L\'acompte est déduit du prix de la prestation et n\'est pas remboursable en cas d\'annulation moins de 24 h avant. ' +
         'Vous recevrez un email de confirmation dès réception.</p>' +
         '<p>' + esc_(CONFIG.NOM_ACTIVITE) + '</p>',
     });
@@ -315,6 +319,7 @@ function configPublique_() {
     acompte: CONFIG.ACOMPTE,
     delaiHeures: CONFIG.DELAI_MIN_HEURES,
     supplementDomicile: CONFIG.SUPPLEMENT_DOMICILE,
+    wero: CONFIG.WERO_NUMERO,
     // heure de début la plus tardive possible, tous jours confondus (sert à griser les jours trop proches)
     dernierDebut: Object.keys(CONFIG.HORAIRES).reduce((m, k) => CONFIG.HORAIRES[k].reduce((mm, r) => r[1] > mm ? r[1] : mm, m), '00:00'),
   };

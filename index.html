@@ -132,7 +132,7 @@
         <textarea id="message" name="message" maxlength="1000" placeholder="Modèle souhaité, longueur, couleur…"></textarea>
         <input class="piege" name="siteweb" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="recap" id="recap"></div>
-        <label class="case"><input type="checkbox" id="conditions" name="conditions"> <span>J'ai lu les conditions : acompte de 10 € pour confirmer, non remboursable en cas d'annulation moins de 24 h avant le rendez-vous.</span></label>
+        <label class="case"><input type="checkbox" id="conditions" name="conditions"> <span>J'ai lu les conditions : acompte de 10 € par Wero pour confirmer, non remboursable en cas d'annulation moins de 24 h avant le rendez-vous.</span></label>
         <button class="envoyer" id="envoyer" type="submit">Envoyer la demande</button>
         <div class="erreur" id="erreur" role="alert"></div>
         <p class="rgpd">Vos informations servent uniquement à gérer votre rendez-vous.</p>
@@ -143,7 +143,7 @@
     <h2 id="titre-infos">Bon à savoir</h2>
     <ul>
       <li><span class="ic">📅</span><div><b>Réservation 48 h à l'avance</b><span class="t">Rendez-vous le samedi et le dimanche, de 9 h à 16 h (heure de début).</span></div></li>
-      <li><span class="ic">💶</span><div><b>Acompte de 10 €</b><span class="t">Demandé pour confirmer le rendez-vous et déduit du prix. Non remboursable en cas d'annulation moins de 24 h avant.</span></div></li>
+      <li><span class="ic">💶</span><div><b>Acompte de 10 € par Wero</b><span class="t">À envoyer au 07 52 34 16 52 depuis l'appli de votre banque pour confirmer le rendez-vous. Déduit du prix, non remboursable en cas d'annulation moins de 24 h avant.</span></div></li>
       <li><span class="ic">🛍️</span><div><b>Mèches non fournies</b><span class="t">Elles sont à acheter avant le rendez-vous. Voir les boutiques ci-dessous.</span></div></li>
       <li><span class="ic">🚗</span><div><b>À domicile dans Poitiers</b><span class="t">Je me déplace chez vous pour un supplément de 15 €.</span></div></li>
       <li><span class="ic">✨</span><div><b>Préparation</b><span class="t">Venez les cheveux propres, démêlés et sans produit.</span></div></li>
@@ -207,7 +207,7 @@ const pause = ms => new Promise(r => setTimeout(r, ms));
 async function demo(p) {
   await pause(250);
   if (p.action === 'config') return { ok: true, config: {
-    nom: 'Naboo', prestations: DEMO_PRESTAS, joursOuverts: [6, 7], joursFermes: [], joursMax: 45, acompte: '10 €', delaiHeures: 48, dernierDebut: '16:00', supplementDomicile: '15 €' } };
+    nom: 'Naboo', prestations: DEMO_PRESTAS, joursOuverts: [6, 7], joursFermes: [], joursMax: 45, acompte: '10 €', delaiHeures: 48, dernierDebut: '16:00', supplementDomicile: '15 €', wero: '07 52 34 16 52' } };
   // Créneaux fictifs : 9h-19h, toutes les heures, selon la durée de la prestation
   const duree = (DEMO_PRESTAS.find(x => x.id === p.prestation) || { duree: 60 }).duree;
   const res = [];
@@ -306,7 +306,8 @@ function majRecap() {
     MOIS_LONG[d.getMonth()] + ' à ' + etat.heure.replace(':', 'h') + ' · environ ' + dureeTxt(etat.presta.duree) +
     (etat.presta.prix ? ' · ' + esc(etat.presta.prix) : '') +
     (domicile() ? '<br>À domicile · supplément ' + esc((etat.config && etat.config.supplementDomicile) || '15 €') : '') +
-    '<span class="acompte">Acompte de ' + esc((etat.config && etat.config.acompte) || '10 €') + ' demandé pour confirmer.</span>';
+    '<span class="acompte">Acompte de ' + esc((etat.config && etat.config.acompte) || '10 €') + ' à envoyer par Wero au ' +
+    esc((etat.config && etat.config.wero) || '07 52 34 16 52') + ' pour confirmer.</span>';
 }
 
 $('form').addEventListener('submit', async ev => {
@@ -326,7 +327,8 @@ $('form').addEventListener('submit', async ev => {
     });
     const recap = $('recap').innerHTML;
     $('app').innerHTML = '<section class="succes"><div class="rond">✓</div><h2>Demande envoyée</h2>' +
-      '<p>' + recap + '</p><p style="color:var(--doux)">Naboo va vous recontacter pour l\'acompte de 10 €. Votre rendez-vous sera confirmé par email dès sa réception.</p></section>';
+      '<p>' + recap + '</p><p style="color:var(--doux)"><b>Dernière étape :</b> envoyez l\'acompte de 10 € par <b>Wero</b> au <b>07 52 34 16 52</b> (depuis l\'appli de votre banque), ' +
+      'avec en message « Acompte ' + esc(f.nom.value.trim()) + ' ». Votre rendez-vous sera confirmé par email dès sa réception.</p></section>';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (e) {
     err.textContent = e.message;
