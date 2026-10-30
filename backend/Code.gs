@@ -26,7 +26,7 @@ const CONFIG = {
   ],
 
   // Horaires d'ouverture : 1 = lundi ... 7 = dimanche (week-ends uniquement)
-  // Ici : heures de DÉBUT possibles (10h à 16h). Mettre DEBUT_SEULEMENT à false
+  // Ici : heures de DÉBUT possibles (9 h à 16 h). Mettre DEBUT_SEULEMENT à false
   // si la prestation doit aussi être terminée avant l'heure de fin.
   HORAIRES: {
     1: [], 2: [], 3: [], 4: [], 5: [],
@@ -44,7 +44,11 @@ const CONFIG = {
   DELAI_MIN_HEURES: 48,      // réservation au moins 48 h à l'avance
   JOURS_MAX_A_L_AVANCE: 45,
   RAPPEL_MINUTES: 60,        // alerte dans ton agenda 60 min avant (0 = aucune)
-  LIEU: 'Poitiers (86000)',  // adresse affichée dans l'événement
+  LIEU: 'Poitiers (86000)',  // ville affichée dans l'événement si pas d'adresse
+  ADRESSE_SALON: '',         // adresse exacte où tu reçois (envoyée seulement dans l'email de confirmation)
+
+  EXPIRATION_ATTENTE_HEURES: 24, // une demande sans acompte libère son créneau après 24 h
+  MAX_DEMANDES_PAR_EMAIL: 2,     // anti-abus : demandes en attente max par adresse email
 };
 
 const FEUILLE = 'Rendez-vous';
@@ -100,6 +104,11 @@ function doPost(e) {
     const lieuTxt = domicile ? 'À domicile (+' + CONFIG.SUPPLEMENT_DOMICILE + ') : ' + adresse : 'Chez Naboo';
 
     lock.waitLock(20000);
+    // Anti-abus : pas plus de N demandes en attente pour la même adresse
+    const enAttente = lignesActives_().filter(r => r.statut === STATUT.ATTENTE && r.email.toLowerCase() === email.toLowerCase());
+    if (enAttente.length >= CONFIG.MAX_DEMANDES_PAR_EMAIL) {
+      throw new Error('Vous avez déjà ' + enAttente.length + ' demande(s) en attente. Merci d\'envoyer l\'acompte ou de nous contacter.');
+    }
     // Revérifie que le créneau est toujours libre (deux clients en même temps)
     if (creneauxLibres_(d.date, presta.id).indexOf(d.heure) === -1) {
       throw new Error('Ce créneau vient d\'être pris. Merci d\'en choisir un autre.');
@@ -107,12 +116,14 @@ function doPost(e) {
 
     const debut = dateParis_(d.date, d.heure);
     const fin = new Date(debut.getTime() + presta.duree * 60000);
-    const id = Utilities.getUuid().slice(0, 8);
+    const id = 'R' + Utilities.getUuid().replace(/-/g, '').slice(0, 9).toUpperCase();
     const token = Utilities.getUuid().replace(/-/g, '');
 
-    feuille_().appendRow([id, token, new Date(), STATUT.ATTENTE, presta.id, presta.nom,
-      debut.toISOString(), fin.toISOString(), nom, email, tel, message, '',
-      domicile ? 'domicile' : 'salon', adresse]);
+    // Les textes sont préfixés par ' pour que Sheets ne les transforme pas
+    // (téléphone 07… → nombre, formules =…) ; les dates restent de vraies dates.
+    feuille_().appendRow([t_(id), t_(token), new Date(), t_(STATUT.ATTENTE), t_(presta.id), t_(presta.nom),
+      debut, fin, t_(nom), t_(email), t_(tel), t_(message), '',
+      t_(domicile ? 'domicile' : 'salon'), t_(adresse)]);
     SpreadsheetApp.flush();
     lock.releaseLock();
 
@@ -131,7 +142,7 @@ function doPost(e) {
         (message ? '<p>Message : ' + esc_(message) + '</p>' : '') +
         '<p>Vérifie que l\'acompte de ' + CONFIG.ACOMPTE + ' est bien arrivé sur Wero avant de valider ' +
         '(message attendu : « Acompte ' + esc_(nom) + ' ' + esc_(Utilities.formatDate(debut, CONFIG.FUSEAU, 'dd/MM')) + ' »).</p>' +
-        '<p><a href="' + lien + '" style="background:#1f6f5c;color:#fff;padding:10px 16px;' +
+        '<p><a href="' + lien + '" style="background:#8a6440;color:#fff;padding:10px 16px;' +
         'border-radius:8px;text-decoration:none">Examiner la demande</a></p>',
     });
 
@@ -149,7 +160,8 @@ function doPost(e) {
         '(depuis l\'appli de votre banque) au <b>' + CONFIG.WERO_NUMERO + '</b>, avec en message : ' +
         '« Acompte ' + esc_(nom) + ' ' + esc_(Utilities.formatDate(debut, CONFIG.FUSEAU, 'dd/MM')) + ' ».</p>' +
         '<p>L\'acompte est déduit du prix de la prestation et n\'est pas remboursable en cas d\'annulation moins de 24 h avant. ' +
-        'Vous recevrez un email de confirmation dès réception.</p>' +
+        'Vous recevrez un email de confirmation dès réception. Sans acompte sous ' + CONFIG.EXPIRATION_ATTENTE_HEURES +
+        ' h, le créneau sera libéré.</p>' +
         '<p>' + esc_(CONFIG.NOM_ACTIVITE) + '</p>',
     });
 
@@ -178,6 +190,9 @@ function decider(id, token, decision) {
     const quand = formatQuand_(debut);
 
     if (decision === 'valider') {
+      // Une demande expirée a pu voir son créneau repris par quelqu'un d'autre entre-temps
+      const conflit = rdvOccupes_().some(o => o.id !== rdv.id && debut.getTime() < o.fin && fin.getTime() > o.debut);
+      if (conflit) throw new Error('Ce créneau est désormais occupé par un autre rendez-vous. Refuse la demande ou propose un autre horaire à la cliente.');
       const uid = rdv.id + '-' + Date.now() + '@rdv';
       const ics = construireIcs_(uid, debut, fin, rdv, true);
       icloudPut_(uid, ics);                       // <- mise à jour de l'agenda en temps réel
@@ -192,11 +207,12 @@ function decider(id, token, decision) {
           '<p>Bonjour ' + esc_(rdv.nom) + ',</p>' +
           '<p>Votre rendez-vous <b>' + esc_(rdv.prestation) + '</b> est confirmé pour le <b>' +
           esc_(quand) + '</b>.<br>Lieu : ' + esc_(rdv.lieu === 'domicile' ? 'à domicile, ' + rdv.adresse +
-          ' (supplément ' + CONFIG.SUPPLEMENT_DOMICILE + ')' : (CONFIG.LIEU || 'chez Naboo')) + '</p>' +
+          ' (supplément ' + CONFIG.SUPPLEMENT_DOMICILE + ')' : (CONFIG.ADRESSE_SALON ||
+          CONFIG.LIEU + ' — l\'adresse exacte vous sera envoyée par message')) + '</p>' +
           '<p>N\'oubliez pas vos mèches (non fournies).</p>' +
           '<p>Merci de venir avec les cheveux propres, démêlés et sans produit. ' +
           'Rappel : l\'acompte n\'est pas remboursable en cas d\'annulation moins de 24 h avant le rendez-vous.</p>' +
-          '<p>Vous pouvez l\'ajouter à votre agenda avec le fichier joint.</p>' +
+          '<p>Vous pouvez l\'ajouter à votre agenda avec le fichier joint. Pour annuler ou déplacer, répondez simplement à cet email.</p>' +
           '<p>' + esc_(CONFIG.NOM_ACTIVITE) + '</p>',
         attachments: [Utilities.newBlob(construireIcs_(uid, debut, fin, rdv, false),
           'text/calendar', 'rendez-vous.ics')],
@@ -235,6 +251,7 @@ function onOpen() {
 }
 
 function annulerSelection() {
+  proprietaireSeulement_();
   const ui = SpreadsheetApp.getUi();
   const ligne = SpreadsheetApp.getActiveRange().getRow();
   if (ligne < 2) return ui.alert('Sélectionne la ligne d\'un rendez-vous.');
@@ -261,6 +278,7 @@ function annulerSelection() {
 
 /** Crée puis supprime un événement de test dans iCloud. */
 function testerIcloud() {
+  proprietaireSeulement_();
   const uid = 'test-' + Date.now() + '@rdv';
   const debut = new Date(Date.now() + 3600000);
   const ics = construireIcs_(uid, debut, new Date(debut.getTime() + 1800000),
@@ -299,12 +317,22 @@ function creneauxLibres_(dateStr, prestationId) {
   return res;
 }
 
+/** Rendez-vous qui bloquent un créneau : validés, ou en attente depuis moins de EXPIRATION_ATTENTE_HEURES. */
 function rdvOccupes_() {
+  const limite = Date.now() - CONFIG.EXPIRATION_ATTENTE_HEURES * 3600000;
+  return lignesActives_()
+    .filter(r => r.statut === STATUT.VALIDE || (r.statut === STATUT.ATTENTE && r.creeLe >= limite))
+    .map(r => ({ id: r.id, debut: r.debut, fin: r.fin }));
+}
+
+/** Lignes en attente ou validées, avec dates en millisecondes. */
+function lignesActives_() {
   const sh = feuille_();
   if (sh.getLastRow() < 2) return [];
   return sh.getRange(2, 1, sh.getLastRow() - 1, COLONNES.length).getValues()
     .filter(r => r[3] === STATUT.ATTENTE || r[3] === STATUT.VALIDE)
-    .map(r => ({ debut: new Date(r[6]).getTime(), fin: new Date(r[7]).getTime() }));
+    .map(r => ({ id: String(r[0]), statut: r[3], email: String(r[9]), creeLe: new Date(r[2]).getTime(),
+      debut: new Date(r[6]).getTime(), fin: new Date(r[7]).getTime() }));
 }
 
 function configPublique_() {
@@ -400,11 +428,17 @@ function icsTexte_(s) {
   return String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
 }
 
-/** Plie les lignes à 75 caractères (RFC 5545) */
+/** Plie les lignes à 75 octets UTF-8 (RFC 5545), sans couper un caractère accentué. */
 function plieLigne_(l) {
+  const octets = c => { const n = c.codePointAt(0); return n < 0x80 ? 1 : n < 0x800 ? 2 : n < 0x10000 ? 3 : 4; };
   const out = [];
-  while (l.length > 74) { out.push(l.slice(0, 74)); l = ' ' + l.slice(74); }
-  out.push(l);
+  let cour = '', taille = 0;
+  for (const c of l) {
+    const t = octets(c);
+    if (taille + t > 75) { out.push(cour); cour = ' '; taille = 1; }
+    cour += c; taille += t;
+  }
+  out.push(cour);
   return out.join('\r\n');
 }
 
@@ -416,6 +450,9 @@ function pageExamen_(id, token) {
   t.valide = !!(rdv && rdv.token === token);
   t.rdv = t.valide ? {
     id: rdv.id, token: rdv.token, statut: rdv.statut, nom: rdv.nom, email: rdv.email,
+    statutTxt: ({ en_attente: 'En attente de l\'acompte', valide: 'Validé', refuse: 'Refusé', annule: 'Annulé' })[rdv.statut] || rdv.statut,
+    messageWero: 'Acompte ' + rdv.nom + ' ' + Utilities.formatDate(new Date(rdv.debut), CONFIG.FUSEAU, 'dd/MM'),
+    acompte: CONFIG.ACOMPTE,
     telephone: rdv.telephone, message: rdv.message, prestation: rdv.prestation,
     quand: formatQuand_(new Date(rdv.debut)),
     lieu: rdv.lieu === 'domicile' ? 'À domicile (+' + CONFIG.SUPPLEMENT_DOMICILE + ') : ' + rdv.adresse : 'Chez Naboo',
@@ -434,6 +471,8 @@ function feuille_() {
     sh.appendRow(COLONNES);
     sh.setFrozenRows(1);
     sh.hideColumns(2); // token
+    ss.setSpreadsheetTimeZone(CONFIG.FUSEAU);
+    [3, 7, 8].forEach(c => sh.getRange(2, c, sh.getMaxRows() - 1, 1).setNumberFormat('dd/MM/yyyy HH:mm'));
   }
   return sh;
 }
@@ -470,7 +509,7 @@ function formatQuand_(d) {
   const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août',
     'septembre', 'octobre', 'novembre', 'décembre'];
   const f = x => Utilities.formatDate(d, CONFIG.FUSEAU, x);
-  return jours[Number(f('u'))] + ' ' + Number(f('d')) + ' ' + mois[Number(f('M')) - 1] + ' à ' + f('HH:mm');
+  return jours[Number(f('u'))] + ' ' + Number(f('d')) + ' ' + mois[Number(f('M')) - 1] + ' à ' + f('HH') + 'h' + f('mm');
 }
 
 function prop_(k) {
@@ -481,6 +520,16 @@ function prop_(k) {
 
 function urlWebApp_() {
   return PropertiesService.getScriptProperties().getProperty('URL_WEBAPP') || ScriptApp.getService().getUrl();
+}
+
+/** Force Sheets à stocker la valeur comme texte brut. */
+function t_(s) { return s === '' ? '' : "'" + String(s); }
+
+/** Bloque l'appel d'une fonction d'administration depuis le web par un inconnu. */
+function proprietaireSeulement_() {
+  const moi = Session.getEffectiveUser().getEmail();
+  const actif = Session.getActiveUser().getEmail();
+  if (!actif || actif !== moi) throw new Error('Action réservée à la propriétaire.');
 }
 
 function nettoie_(s, max) { return String(s || '').trim().slice(0, max); }

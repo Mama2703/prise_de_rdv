@@ -5,19 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Naboo — Prendre rendez-vous</title>
 <meta name="description" content="Naboo, coiffure afro à Poitiers : braids, crochet locks, twist, nattes collées, tissage. Réservez votre rendez-vous en ligne.">
+<meta property="og:title" content="Naboo — Coiffure afro à Poitiers">
+<meta property="og:description" content="Braids, crochet locks, twist, nattes collées, tissage. Réservez votre rendez-vous du week-end en ligne.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mama2703.github.io/prise_de_rdv/">
+<meta name="theme-color" content="#8a6a4a">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%238a6a4a'/><text x='32' y='45' font-size='36' text-anchor='middle' fill='%23fdf6ec' font-family='Georgia,serif' font-style='italic'>N</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Josefin+Sans:wght@300;400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --fond: #f4ece2; --carte: #fffaf4; --texte: #3a2a1c; --doux: #85705c;
     --accent: #8a6440; --accent-doux: #efe2d2; --bord: #e4d6c4; --erreur: #9a2f22;
-    --entete: #8a6a4a; --entete-texte: #fdf6ec;
+    --entete: #8a6a4a; --entete-texte: #fdf6ec; --sur-accent: #ffffff;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --fond: #1c1510; --carte: #261d16; --texte: #f3e9dd; --doux: #b8a28c;
       --accent: #d2a87c; --accent-doux: #3a2c20; --bord: #3d2f24; --erreur: #f0a49a;
-      --entete: #3a2b1f; --entete-texte: #f6ead9;
+      --entete: #3a2b1f; --entete-texte: #f6ead9; --sur-accent: #1c1510;
     }
   }
   * { box-sizing: border-box; }
@@ -54,12 +60,12 @@
   textarea { min-height: 80px; resize: vertical; }
   .piege { position: absolute; left: -9999px; }
   .recap { background: var(--accent-doux); border-radius: 12px; padding: 12px 14px; margin-top: 16px; font-size: 15px; }
-  .envoyer { width: 100%; margin-top: 16px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; font: 600 16px Inter, sans-serif; padding: 15px; cursor: pointer; }
+  .envoyer { width: 100%; margin-top: 16px; border: 0; border-radius: 12px; background: var(--accent); color: var(--sur-accent); font: 600 16px Inter, sans-serif; padding: 15px; cursor: pointer; }
   .envoyer:disabled { opacity: .5; cursor: wait; }
   .erreur { color: var(--erreur); font-size: 14px; margin-top: 10px; min-height: 1em; }
   .rgpd { font-size: 12px; color: var(--doux); margin-top: 12px; }
   .succes { text-align: center; padding: 40px 20px; }
-  .succes .rond { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 28px; margin: 0 auto 14px; }
+  .succes .rond { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: var(--sur-accent); display: grid; place-items: center; font-size: 28px; margin: 0 auto 14px; }
   .succes h2 { justify-content: center; font-size: 36px; text-transform: none; letter-spacing: 0; color: var(--texte); font-family: "Great Vibes", cursive; font-weight: 400; }
   .demo { font-size: 12px; background: #fff4d6; color: #6a5300; border-radius: 8px; padding: 8px 10px; margin-bottom: 14px; }
   .chargement { color: var(--doux); font-size: 14px; }
@@ -93,15 +99,18 @@
   details.plie > summary::after { content: "+"; font-size: 22px; color: var(--accent); font-weight: 400; }
   details.plie[open] > summary::after { content: "–"; }
   details.plie > .contenu { padding: 0 20px 20px; }
+  .mentions p { font-size: 14px; color: var(--doux); margin: 0 0 10px; }
+  .mentions a { color: var(--accent); }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
   .recap .meches { display: block; margin-top: 6px; font-size: 14px; color: var(--doux); }
   .recap .meches a { color: var(--accent); font-weight: 600; }
   .fini { text-align: left; }
   .fini .tete { text-align: center; margin-bottom: 18px; }
-  .rond-ok { width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 26px; margin: 0 auto 8px; }
+  .rond-ok { width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: var(--sur-accent); display: grid; place-items: center; font-size: 26px; margin: 0 auto 8px; }
   .fini .tete h2 { justify-content: center; font-size: 34px; text-transform: none; letter-spacing: 0; color: var(--texte); font-family: "Great Vibes", cursive; font-weight: 400; margin: 0; }
   .fini .tete p { margin: 2px 0 0; color: var(--doux); }
   .etape-wero { border: 2px solid var(--accent); background: var(--accent-doux); border-radius: 16px; padding: 16px; }
-  .etape-wero .badge { display: inline-block; background: var(--accent); color: #fff; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; }
+  .etape-wero .badge { display: inline-block; background: var(--accent); color: var(--sur-accent); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; }
   .etape-wero h3 { margin: 10px 0 4px; font-size: 19px; }
   .etape-wero .num-wero { font-size: 28px; font-weight: 700; letter-spacing: .03em; color: var(--accent); margin: 8px 0 2px; }
   .etape-wero .msg-wero { background: var(--carte); border-radius: 10px; padding: 8px 12px; font-size: 15px; margin-top: 10px; }
@@ -127,10 +136,10 @@
   <div id="demo" class="demo" hidden>Mode démo : aucune demande n'est réellement envoyée. Les réservations seront bientôt ouvertes.</div>
 
   <div class="essentiels" aria-label="L'essentiel">
-    <div class="ess"><span class="e">📅</span><b>Sam. et dim. · 9 h–16 h</b>Réservez au moins 48 h avant</div>
-    <div class="ess"><span class="e">💶</span><b>Acompte 10 € par Wero</b>Pour confirmer le rendez-vous</div>
-    <a class="ess" href="#boutiques" data-ouvrir="boutiques"><span class="e">🛍️</span><b>Mèches à apporter</b><u>Où les acheter ?</u></a>
-    <div class="ess"><span class="e">🚗</span><b>À domicile possible</b>Dans Poitiers, +15 €</div>
+    <div class="ess"><span class="e" aria-hidden="true">📅</span><b>Sam. et dim. · 9 h–16 h</b>Réservez au moins 48 h avant</div>
+    <div class="ess"><span class="e" aria-hidden="true">💶</span><b>Acompte 10 € par Wero</b>Pour confirmer le rendez-vous</div>
+    <a class="ess" href="#boutiques" data-ouvrir="boutiques"><span class="e" aria-hidden="true">🛍️</span><b>Mèches à apporter</b><u>Où les acheter ?</u></a>
+    <div class="ess"><span class="e" aria-hidden="true">🚗</span><b>À domicile possible</b>Dans Poitiers, +15 €</div>
   </div>
 
   <div id="app">
@@ -162,8 +171,8 @@
         <input id="nom" name="nom" autocomplete="name" required maxlength="80">
         <label for="email">Email</label>
         <input id="email" name="email" type="email" autocomplete="email" required maxlength="120">
-        <label for="telephone">Téléphone <small>(facultatif)</small></label>
-        <input id="telephone" name="telephone" type="tel" autocomplete="tel" maxlength="30">
+        <label for="telephone">Téléphone</label>
+        <input id="telephone" name="telephone" type="tel" autocomplete="tel" required maxlength="30" placeholder="Pour vous joindre le jour J">
         <label for="message">Message <small>(facultatif)</small></label>
         <textarea id="message" name="message" maxlength="1000" placeholder="Modèle souhaité, longueur, couleur…"></textarea>
         <input class="piege" name="siteweb" tabindex="-1" autocomplete="off" aria-hidden="true">
@@ -178,13 +187,13 @@
   <details class="plie infos-pratiques" id="infos">
     <summary>Toutes les infos pratiques</summary>
     <div class="contenu"><ul>
-      <li><span class="ic">📅</span><div><b>Réservation 48 h à l'avance</b><span class="t">Rendez-vous le samedi et le dimanche, de 9 h à 16 h (heure de début).</span></div></li>
-      <li><span class="ic">💶</span><div><b>Acompte de 10 € par Wero</b><span class="t">À envoyer au 07 52 34 16 52 depuis l'appli de votre banque pour confirmer le rendez-vous. Déduit du prix, non remboursable en cas d'annulation moins de 24 h avant.</span></div></li>
-      <li><span class="ic">🛍️</span><div><b>Mèches non fournies</b><span class="t">Elles sont à acheter avant le rendez-vous. <a href="#boutiques" data-ouvrir="boutiques">Voir les boutiques</a>.</span></div></li>
-      <li><span class="ic">🚗</span><div><b>À domicile dans Poitiers</b><span class="t">Je me déplace chez vous pour un supplément de 15 €.</span></div></li>
-      <li><span class="ic">✨</span><div><b>Préparation</b><span class="t">Venez les cheveux propres, démêlés et sans produit.</span></div></li>
-      <li><span class="ic">⏱️</span><div><b>Durées indicatives</b><span class="t">Elles varient selon la longueur, l'épaisseur et le modèle choisi.</span></div></li>
-      <li><span class="ic">📸</span><div><b>Une idée de modèle ?</b><span class="t">Décrivez-la dans le message ou envoyez une photo sur Instagram <a href="https://www.instagram.com/naboo__dioum/" target="_blank" rel="noopener">@naboo__dioum</a>.</span></div></li>
+      <li><span class="ic" aria-hidden="true">📅</span><div><b>Réservation 48 h à l'avance</b><span class="t">Rendez-vous le samedi et le dimanche, de 9 h à 16 h (heure de début).</span></div></li>
+      <li><span class="ic" aria-hidden="true">💶</span><div><b>Acompte de 10 € par Wero</b><span class="t">À envoyer au 07 52 34 16 52 depuis l'appli de votre banque pour confirmer le rendez-vous. Déduit du prix, non remboursable en cas d'annulation moins de 24 h avant.</span></div></li>
+      <li><span class="ic" aria-hidden="true">🛍️</span><div><b>Mèches non fournies</b><span class="t">Elles sont à acheter avant le rendez-vous. <a href="#boutiques" data-ouvrir="boutiques">Voir les boutiques</a>.</span></div></li>
+      <li><span class="ic" aria-hidden="true">🚗</span><div><b>À domicile dans Poitiers</b><span class="t">Je me déplace chez vous pour un supplément de 15 €.</span></div></li>
+      <li><span class="ic" aria-hidden="true">✨</span><div><b>Préparation</b><span class="t">Venez les cheveux propres, démêlés et sans produit.</span></div></li>
+      <li><span class="ic" aria-hidden="true">⏱️</span><div><b>Durées indicatives</b><span class="t">Elles varient selon la longueur, l'épaisseur et le modèle choisi.</span></div></li>
+      <li><span class="ic" aria-hidden="true">📸</span><div><b>Une idée de modèle ?</b><span class="t">Décrivez-la dans le message ou envoyez une photo sur Instagram <a href="https://www.instagram.com/naboo__dioum/" target="_blank" rel="noopener">@naboo__dioum</a>.</span></div></li>
     </ul></div>
   </details>
 
@@ -194,6 +203,15 @@
     <p class="vide">Pensez à appeler avant de vous déplacer pour vérifier le stock. Un doute sur la quantité ou la couleur ? Demandez-moi sur Instagram.</p></div>
   </details>
 
+  <details class="plie infos-pratiques" id="mentions">
+    <summary>Mentions légales et données</summary>
+    <div class="contenu mentions">
+      <p><b>Éditrice du site :</b> Naboo, coiffure afro, 86000 Poitiers. Contact : <a href="tel:+33752341652">07 52 34 16 52</a>, Instagram <a href="https://www.instagram.com/naboo__dioum/" target="_blank" rel="noopener">@naboo__dioum</a>.</p>
+      <p><b>Hébergement :</b> GitHub Pages, GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis.</p>
+      <p><b>Vos données :</b> les informations du formulaire (nom, email, téléphone, adresse si à domicile, message) servent uniquement à gérer votre rendez-vous. Elles sont enregistrées dans l'espace Google de Naboo et ne sont ni vendues ni partagées. Elles sont conservées le temps nécessaire à la gestion des rendez-vous. Vous pouvez demander à les consulter ou les supprimer à tout moment par téléphone ou sur Instagram.</p>
+      <p>Ce site n'utilise ni cookies publicitaires ni outil de suivi.</p>
+    </div>
+  </details>
 </main>
 <footer>
   <div class="ligne">
@@ -208,6 +226,7 @@
 const API_URL = 'COLLER_ICI_URL_APPS_SCRIPT';
 
 const DEMO = !API_URL.startsWith('https://');
+const DOUX = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
 const etat = { config: null, presta: null, date: null, heure: null };
 const $ = id => document.getElementById(id);
 const JOURS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
@@ -279,7 +298,7 @@ async function init() {
         selectionne(c, b); etat.presta = p; etat.heure = null;
         $('s2').hidden = false; $('s3').hidden = true;
         if (etat.date) chargerCreneaux(); else afficherJours();
-        $('s2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('s2').scrollIntoView({ behavior: DOUX, block: 'start' });
       });
       c.appendChild(b);
     });
@@ -328,7 +347,7 @@ async function chargerCreneaux() {
       const b = bouton('creneau', h.replace(':', 'h'), () => {
         selectionne(c, b); etat.heure = h;
         $('s3').hidden = false; majRecap();
-        $('s3').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('s3').scrollIntoView({ behavior: DOUX, block: 'start' });
       });
       c.appendChild(b);
     });
@@ -353,6 +372,7 @@ $('form').addEventListener('submit', async ev => {
   const f = ev.target, err = $('erreur'); err.textContent = '';
   if (!f.nom.value.trim()) return err.textContent = 'Merci d\'indiquer votre nom.';
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value.trim())) return err.textContent = 'Merci d\'indiquer un email valide.';
+  if (f.telephone.value.replace(/\D/g, '').length < 9) return err.textContent = 'Merci d\'indiquer votre numéro de téléphone.';
   if (domicile() && f.adresse.value.trim().length < 8) return err.textContent = 'Merci d\'indiquer votre adresse à Poitiers.';
   if (!f.conditions.checked) return err.textContent = 'Merci d\'accepter les conditions de réservation.';
   $('envoyer').disabled = true; $('envoyer').textContent = 'Envoi…';
@@ -400,7 +420,7 @@ function afficherFin(nom, email) {
       '</ol>' +
       '<div class="petit-recap">' + recap + '<br>Acompte non remboursable en cas d\'annulation moins de 24 h avant.</div>' +
     '</section>';
-  $('fini').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('fini').scrollIntoView({ behavior: DOUX, block: 'start' });
 }
 
 // Boutons « Copier »
@@ -424,7 +444,7 @@ document.addEventListener('click', e => {
   e.preventDefault();
   const cible = $(a.getAttribute('data-ouvrir'));
   cible.open = true;
-  cible.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  cible.scrollIntoView({ behavior: DOUX, block: 'start' });
 });
 
 // ---------- Lieu (salon / domicile) ----------
@@ -441,7 +461,7 @@ const BOUTIQUES = [
   { nom: 'Ekitrade', adresse: '5 boulevard Jeanne d\'Arc, 86000 Poitiers', tel: '05 49 46 64 25' },
 ];
 $('liste-boutiques').innerHTML = BOUTIQUES.map(b =>
-  '<li><span class="ic">📍</span><div><b>' + esc(b.nom) + '</b><span class="t">' +
+  '<li><span class="ic" aria-hidden="true">📍</span><div><b>' + esc(b.nom) + '</b><span class="t">' +
   '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(b.nom + ' ' + b.adresse) + '" target="_blank" rel="noopener">' + esc(b.adresse) + '</a>' +
   (b.tel ? ' · <a href="tel:' + b.tel.replace(/\s/g, '') + '">' + esc(b.tel) + '</a>' : '') + '</span></div></li>').join('');
 
