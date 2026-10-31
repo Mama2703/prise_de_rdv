@@ -130,16 +130,16 @@
 <div class="bandeau">
   <p class="script">Sublimez-vous avec Naboo</p>
   <p class="titre">Prise de rendez-vous</p>
-  <p class="infos">Coiffure afro · Poitiers · Disponible tous les week-ends</p>
+  <p class="infos">Coiffure afro · Poitiers · <span id="txt-dispo">Disponible tous les week-ends</span></p>
 </div>
 <main>
   <div id="demo" class="demo" hidden>Mode démo : aucune demande n'est réellement envoyée. Les réservations seront bientôt ouvertes.</div>
 
   <div class="essentiels" aria-label="L'essentiel">
-    <div class="ess"><span class="e" aria-hidden="true">📅</span><b>Sam. et dim. · 9 h–16 h</b>Réservez au moins 48 h avant</div>
-    <div class="ess"><span class="e" aria-hidden="true">💶</span><b>Acompte 10 € par Wero</b>Pour confirmer le rendez-vous</div>
+    <div class="ess"><span class="e" aria-hidden="true">📅</span><b id="ess-horaires">Sam. et dim. · 9 h–16 h</b><span id="ess-delai">Réservez au moins 48 h avant</span></div>
+    <div class="ess"><span class="e" aria-hidden="true">💶</span><b id="ess-acompte">Acompte 10 € par Wero</b>Pour confirmer le rendez-vous</div>
     <a class="ess" href="#boutiques" data-ouvrir="boutiques"><span class="e" aria-hidden="true">🛍️</span><b>Mèches à apporter</b><u>Où les acheter ?</u></a>
-    <div class="ess"><span class="e" aria-hidden="true">🚗</span><b>À domicile possible</b>Dans Poitiers, +15 €</div>
+    <div class="ess"><span class="e" aria-hidden="true">🚗</span><b>À domicile possible</b><span id="ess-domicile">Dans Poitiers, +15 €</span></div>
   </div>
 
   <div id="app">
@@ -161,7 +161,7 @@
         <div class="label-groupe">Lieu du rendez-vous</div>
         <div class="lieux" role="radiogroup" aria-label="Lieu du rendez-vous">
           <label class="lieu"><input type="radio" name="lieu" value="salon" checked> <span><b>Chez Naboo</b><small>Poitiers</small></span></label>
-          <label class="lieu"><input type="radio" name="lieu" value="domicile"> <span><b>À domicile</b><small>dans Poitiers · +15 €</small></span></label>
+          <label class="lieu"><input type="radio" name="lieu" value="domicile"> <span><b>À domicile</b><small id="txt-lieu-domicile">dans Poitiers · +15 €</small></span></label>
         </div>
         <div id="bloc-adresse" hidden>
           <label for="adresse">Votre adresse à Poitiers</label>
@@ -177,7 +177,7 @@
         <textarea id="message" name="message" maxlength="1000" placeholder="Modèle souhaité, longueur, couleur…"></textarea>
         <input class="piege" name="siteweb" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="recap" id="recap"></div>
-        <label class="case"><input type="checkbox" id="conditions" name="conditions"> <span>J'ai lu les conditions : acompte de 10 € par Wero pour confirmer, non remboursable en cas d'annulation moins de 24 h avant le rendez-vous.</span></label>
+        <label class="case"><input type="checkbox" id="conditions" name="conditions"> <span id="txt-conditions">J'ai lu les conditions : acompte de 10 € par Wero pour confirmer, non remboursable en cas d'annulation moins de 24 h avant le rendez-vous.</span></label>
         <button class="envoyer" id="envoyer" type="submit">Envoyer la demande</button>
         <div class="erreur" id="erreur" role="alert"></div>
         <p class="rgpd">Vos informations servent uniquement à gérer votre rendez-vous.</p>
@@ -187,10 +187,10 @@
   <details class="plie infos-pratiques" id="infos">
     <summary>Toutes les infos pratiques</summary>
     <div class="contenu"><ul>
-      <li><span class="ic" aria-hidden="true">📅</span><div><b>Réservation 48 h à l'avance</b><span class="t">Rendez-vous le samedi et le dimanche, de 9 h à 16 h (heure de début).</span></div></li>
-      <li><span class="ic" aria-hidden="true">💶</span><div><b>Acompte de 10 € par Wero</b><span class="t">À envoyer au 07 52 34 16 52 depuis l'appli de votre banque pour confirmer le rendez-vous. Déduit du prix, non remboursable en cas d'annulation moins de 24 h avant.</span></div></li>
+      <li><span class="ic" aria-hidden="true">📅</span><div><b id="info-delai">Réservation 48 h à l'avance</b><span class="t" id="info-horaires">Rendez-vous le samedi et le dimanche, de 9 h à 16 h (heure de début).</span></div></li>
+      <li><span class="ic" aria-hidden="true">💶</span><div><b id="info-acompte">Acompte de 10 € par Wero</b><span class="t" id="info-acompte-t">À envoyer au 07 52 34 16 52 depuis l'appli de votre banque pour confirmer le rendez-vous. Déduit du prix, non remboursable en cas d'annulation moins de 24 h avant.</span></div></li>
       <li><span class="ic" aria-hidden="true">🛍️</span><div><b>Mèches non fournies</b><span class="t">Elles sont à acheter avant le rendez-vous. <a href="#boutiques" data-ouvrir="boutiques">Voir les boutiques</a>.</span></div></li>
-      <li><span class="ic" aria-hidden="true">🚗</span><div><b>À domicile dans Poitiers</b><span class="t">Je me déplace chez vous pour un supplément de 15 €.</span></div></li>
+      <li><span class="ic" aria-hidden="true">🚗</span><div><b>À domicile dans Poitiers</b><span class="t" id="info-domicile">Je me déplace chez vous pour un supplément de 15 €.</span></div></li>
       <li><span class="ic" aria-hidden="true">✨</span><div><b>Préparation</b><span class="t">Venez les cheveux propres, démêlés et sans produit.</span></div></li>
       <li><span class="ic" aria-hidden="true">⏱️</span><div><b>Durées indicatives</b><span class="t">Elles varient selon la longueur, l'épaisseur et le modèle choisi.</span></div></li>
       <li><span class="ic" aria-hidden="true">📸</span><div><b>Une idée de modèle ?</b><span class="t">Décrivez-la dans le message ou envoyez une photo sur Instagram <a href="https://www.instagram.com/naboo__dioum/" target="_blank" rel="noopener">@naboo__dioum</a>.</span></div></li>
@@ -291,6 +291,7 @@ async function init() {
   try {
     const { config } = await api({ action: 'config' });
     etat.config = config;
+    appliquerConfig(config);
     const c = $('prestas'); c.innerHTML = '';
     config.prestations.forEach(p => {
       const b = bouton('', '<span class="presta-nom">' + esc(p.nom) + '</span><span class="presta-droite">' +
@@ -316,7 +317,7 @@ function afficherJours() {
     const jIso = d.getDay() === 0 ? 7 : d.getDay();
     const finJour = new Date(d); const [hh, mm] = (cfg.dernierDebut || '23:59').split(':').map(Number); finJour.setHours(hh, mm);
     const tropTot = finJour.getTime() < Date.now() + (cfg.delaiHeures || 0) * 3600000;
-    const ouvert = cfg.joursOuverts.includes(jIso) && !cfg.joursFermes.includes(iso(d)) && !tropTot;
+    const ouvert = (cfg.joursOuverts.includes(jIso) || (cfg.joursExtra || []).includes(iso(d))) && !cfg.joursFermes.includes(iso(d)) && !tropTot;
     const b = bouton('jour', '<span class="js">' + JOURS[d.getDay()] + '</span><span class="jn">' + d.getDate() +
       '</span><span class="jm">' + MOIS[d.getMonth()] + '</span>', () => {
       selectionne(c, b); etat.date = iso(d); etat.dateObj = d; etat.heure = null;
@@ -459,10 +460,49 @@ const BOUTIQUES = [
   { nom: "Bel'Ivoire", adresse: '11 place Jean de Berry, 86000 Poitiers', tel: '05 49 61 26 37' },
   { nom: 'Ekitrade', adresse: '5 boulevard Jeanne d\'Arc, 86000 Poitiers', tel: '05 49 46 64 25' },
 ];
-$('liste-boutiques').innerHTML = BOUTIQUES.map(b =>
+function afficherBoutiques(liste) {
+$('liste-boutiques').innerHTML = liste.map(b =>
   '<li><span class="ic" aria-hidden="true">📍</span><div><b>' + esc(b.nom) + '</b><span class="t">' +
   '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(b.nom + ' ' + b.adresse) + '" target="_blank" rel="noopener">' + esc(b.adresse) + '</a>' +
   (b.tel ? ' · <a href="tel:' + b.tel.replace(/\s/g, '') + '">' + esc(b.tel) + '</a>' : '') + '</span></div></li>').join('');
+}
+afficherBoutiques(BOUTIQUES);
+
+// ---------- Textes générés à partir des réglages (modifiables dans la page d'administration) ----------
+function hTxt(h) { const [a, b] = h.split(':'); return Number(a) + ' h' + (b !== '00' ? ' ' + b : ''); }
+function appliquerConfig(cfg) {
+  const set = (id, t) => { const el = $(id); if (el && t) el.textContent = t; };
+  const H = cfg.horaires || {};
+  const ouverts = [1, 2, 3, 4, 5, 6, 7].filter(j => (H[j] || []).length);
+  const COURTS = { 1: 'lun.', 2: 'mar.', 3: 'mer.', 4: 'jeu.', 5: 'ven.', 6: 'sam.', 7: 'dim.' };
+  const LONGS = { 1: 'lundi', 2: 'mardi', 3: 'mercredi', 4: 'jeudi', 5: 'vendredi', 6: 'samedi', 7: 'dimanche' };
+  const liste = (noms) => noms.length > 1 ? noms.slice(0, -1).join(', ') + ' et ' + noms[noms.length - 1] : (noms[0] || '');
+  const plages = ouverts.map(j => JSON.stringify(H[j]));
+  const memes = plages.length && plages.every(p => p === plages[0]);
+  const plageTxt = memes ? H[ouverts[0]].map(p => hTxt(p[0]) + '–' + hTxt(p[1])).join(', ') : '';
+  const joursCourts = liste(ouverts.map(j => COURTS[j]));
+  const delai = Number(cfg.delaiHeures) || 0;
+  const acompte = cfg.acompte || '', supp = cfg.supplementDomicile || '';
+
+  if (ouverts.length) {
+    set('ess-horaires', joursCourts.charAt(0).toUpperCase() + joursCourts.slice(1) + (plageTxt ? ' · ' + plageTxt : ''));
+    set('info-horaires', 'Rendez-vous le ' + liste(ouverts.map(j => LONGS[j])) +
+      (plageTxt ? ', de ' + plageTxt.replace('–', ' à ') + ' (heure de début).' : ' (horaires selon le jour).'));
+  }
+  set('txt-dispo', ouverts.length === 2 && ouverts[0] === 6 && ouverts[1] === 7 ? 'Disponible tous les week-ends' : 'Sur rendez-vous');
+  if (delai) { set('ess-delai', 'Réservez au moins ' + delai + ' h avant'); set('info-delai', 'Réservation ' + delai + ' h à l\'avance'); }
+  else { set('ess-delai', 'Réservez en ligne'); set('info-delai', 'Réservation en ligne'); }
+  if (acompte) {
+    set('ess-acompte', 'Acompte ' + acompte + ' par Wero');
+    set('info-acompte', 'Acompte de ' + acompte + ' par Wero');
+    set('info-acompte-t', 'À envoyer au ' + (cfg.wero || '') + ' depuis l\'appli de votre banque pour confirmer le rendez-vous. Déduit du prix, non remboursable en cas d\'annulation moins de 24 h avant.');
+    set('txt-conditions', 'J\'ai lu les conditions : acompte de ' + acompte + ' par Wero pour confirmer, non remboursable en cas d\'annulation moins de 24 h avant le rendez-vous.');
+  }
+  set('ess-domicile', 'Dans Poitiers' + (supp ? ', +' + supp : ''));
+  set('txt-lieu-domicile', 'dans Poitiers' + (supp ? ' · +' + supp : ''));
+  set('info-domicile', 'Je me déplace chez vous' + (supp ? ' pour un supplément de ' + supp : '') + '.');
+  if (Array.isArray(cfg.boutiques) && cfg.boutiques.length) afficherBoutiques(cfg.boutiques);
+}
 
 init();
 </script>

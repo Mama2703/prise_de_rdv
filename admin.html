@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Naboo — Gestion</title>
+<meta name="theme-color" content="#8a6a4a">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%238a6a4a'/><text x='32' y='45' font-size='36' text-anchor='middle' fill='%23fdf6ec' font-family='Georgia,serif' font-style='italic'>N</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Josefin+Sans:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fond: #f4ece2; --carte: #fffaf4; --texte: #3a2a1c; --doux: #85705c;
+    --accent: #8a6440; --accent-doux: #efe2d2; --bord: #e4d6c4; --erreur: #9a2f22; --erreur-doux: #f8e3df;
+    --ok: #2f6b45; --ok-doux: #e1f0e5; --attente: #8a5a00; --attente-doux: #fbefd5;
+    --entete: #8a6a4a; --entete-texte: #fdf6ec; --sur-accent: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --fond: #1c1510; --carte: #261d16; --texte: #f3e9dd; --doux: #b8a28c;
+      --accent: #d2a87c; --accent-doux: #3a2c20; --bord: #3d2f24; --erreur: #f0a49a; --erreur-doux: #3d2220;
+      --ok: #8fd1a6; --ok-doux: #1f3326; --attente: #f0c46c; --attente-doux: #3a2e14;
+      --entete: #3a2b1f; --entete-texte: #f6ead9; --sur-accent: #1c1510;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fond); color: var(--texte); font: 16px/1.5 Inter, system-ui, sans-serif; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  a { color: var(--accent); }
+  [hidden] { display: none !important; }
+
+  .entete { background: var(--entete); color: var(--entete-texte); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .entete .marque { font-family: "Great Vibes", cursive; font-size: 30px; line-height: 1; }
+  .entete .marque small { font-family: "Josefin Sans", sans-serif; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; margin-left: 8px; opacity: .85; }
+  .entete .liens { display: flex; gap: 6px; }
+  .entete .liens a, .entete .liens button { all: unset; cursor: pointer; font-size: 13px; font-weight: 600; padding: 6px 10px; border: 1px solid rgba(255,255,255,.35); border-radius: 99px; color: var(--entete-texte); }
+
+  .onglets { position: sticky; top: 0; z-index: 5; background: var(--fond); border-bottom: 1px solid var(--bord); display: flex; overflow-x: auto; padding: 0 8px; }
+  .onglets button { all: unset; cursor: pointer; padding: 13px 12px 11px; font-weight: 600; font-size: 14px; color: var(--doux); border-bottom: 3px solid transparent; white-space: nowrap; }
+  .onglets button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+  .onglets .pastille { display: inline-block; min-width: 20px; padding: 0 6px; margin-left: 4px; border-radius: 99px; background: var(--erreur); color: #fff; font-size: 12px; text-align: center; }
+
+  main { max-width: 640px; margin: 0 auto; padding: 16px 16px 120px; }
+  .carte { background: var(--carte); border: 1px solid var(--bord); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  h2 { font-family: "Josefin Sans", sans-serif; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--doux); margin: 0 0 4px; }
+  .aide { color: var(--doux); font-size: 14px; margin: 0 0 12px; }
+  label.champ { display: block; font-size: 14px; font-weight: 500; margin: 12px 0 4px; }
+  input[type=text], input[type=tel], input[type=password], input[type=number], input[type=date], input[type=time], select, textarea {
+    width: 100%; background: var(--fond); border: 1.5px solid var(--bord); border-radius: 10px; padding: 10px 12px; min-height: 44px; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  .ligne { display: flex; gap: 8px; align-items: center; }
+  .ligne > * { flex: 1; min-width: 0; }
+  .ligne > .fixe { flex: 0 0 auto; }
+
+  .btn { all: unset; box-sizing: border-box; cursor: pointer; text-align: center; font-weight: 600; font-size: 15px; padding: 11px 16px; border-radius: 12px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn-principal { background: var(--accent); color: var(--sur-accent); }
+  .btn-second { border: 1.5px solid var(--accent); color: var(--accent); }
+  .btn-danger { border: 1.5px solid var(--erreur); color: var(--erreur); }
+  .btn-lien { color: var(--doux); font-weight: 500; font-size: 14px; padding: 8px 4px; min-height: 0; text-decoration: underline; }
+  .btn[disabled] { opacity: .5; cursor: wait; }
+  .btn-plein { width: 100%; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .actions .btn { flex: 1 1 auto; }
+
+  /* Connexion */
+  .connexion { max-width: 380px; margin: 10vh auto 0; padding: 0 16px; }
+  .connexion .marque-grande { font-family: "Great Vibes", cursive; font-size: 52px; text-align: center; color: var(--accent); margin: 0; }
+  .connexion p.sous { text-align: center; color: var(--doux); margin: 0 0 20px; }
+  .erreur { color: var(--erreur); font-size: 14px; margin-top: 10px; min-height: 1.2em; }
+
+  /* Rendez-vous */
+  .filtres { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; }
+  .filtres button { all: unset; cursor: pointer; font-size: 14px; font-weight: 600; padding: 8px 14px; border-radius: 99px; border: 1.5px solid var(--bord); white-space: nowrap; }
+  .filtres button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--sur-accent); }
+  .rdv .haut { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+  .rdv .quand { font-weight: 600; font-size: 17px; }
+  .rdv .presta { color: var(--doux); font-size: 14px; }
+  .statut { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
+  .st-en_attente { background: var(--attente-doux); color: var(--attente); }
+  .st-valide { background: var(--ok-doux); color: var(--ok); }
+  .st-refuse, .st-annule { background: var(--erreur-doux); color: var(--erreur); }
+  .rdv dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 12px 0 0; font-size: 15px; }
+  .rdv dt { color: var(--doux); font-size: 13px; padding-top: 2px; }
+  .rdv dd { margin: 0; word-break: break-word; }
+  .wero { background: var(--attente-doux); color: var(--texte); border-radius: 10px; padding: 10px 12px; font-size: 14px; margin-top: 12px; }
+  .vide { color: var(--doux); text-align: center; padding: 28px 12px; }
+
+  /* Disponibilités */
+  .jour-ligne { display: grid; grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1fr); gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--bord); }
+  .jour-ligne:last-child { border-bottom: 0; }
+  .jour-ligne input[type=time] { min-width: 0; padding: 8px; }
+  .jour-ligne label { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; cursor: pointer; }
+  .jour-ligne input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--accent); }
+  .jour-ligne .ferme { grid-column: 2 / 4; color: var(--doux); font-size: 14px; }
+  .puces { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .puce { display: inline-flex; align-items: center; gap: 6px; background: var(--accent-doux); border-radius: 99px; padding: 5px 6px 5px 12px; font-size: 14px; }
+  .puce button { all: unset; cursor: pointer; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; color: var(--doux); }
+  .puce button:hover { background: var(--bord); }
+  .grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; margin-top: 12px; }
+  .grille button { all: unset; cursor: pointer; text-align: center; padding: 10px 0; border-radius: 10px; border: 1.5px solid var(--bord); font-weight: 500; }
+  .grille button[aria-pressed="true"] { background: var(--erreur-doux); border-color: var(--erreur); color: var(--erreur); text-decoration: line-through; }
+  .case { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; margin-top: 12px; cursor: pointer; }
+  .case input { width: 20px; height: 20px; flex: 0 0 20px; margin-top: 2px; accent-color: var(--accent); }
+  .groupe-bloques { margin-top: 12px; font-size: 14px; }
+  .groupe-bloques b { display: block; margin-top: 8px; }
+
+  /* Prestations */
+  .presta-carte .ligne { margin-top: 8px; }
+  .presta-carte .ordre { display: flex; gap: 4px; }
+  .presta-carte .ordre button { all: unset; cursor: pointer; width: 40px; height: 40px; border-radius: 10px; border: 1.5px solid var(--bord); display: grid; place-items: center; }
+  .presta-carte.inactive { opacity: .65; }
+
+  /* Barre d'enregistrement */
+  .barre { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--carte); border-top: 1px solid var(--bord); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 20px rgba(0,0,0,.08); }
+  .barre .dedans { max-width: 640px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
+  .barre .txt { flex: 1; font-size: 14px; font-weight: 500; }
+  .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 90px; z-index: 20; max-width: calc(100% - 32px); background: var(--texte); color: var(--fond); padding: 12px 16px; border-radius: 12px; font-size: 15px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+  .toast.err { background: var(--erreur); color: #fff; }
+  .chargement { text-align: center; color: var(--doux); padding: 40px 0; }
+</style>
+</head>
+<body>
+
+<!-- ============ CONNEXION ============ -->
+<div id="ecran-connexion" class="connexion" hidden>
+  <p class="marque-grande">Naboo</p>
+  <p class="sous">Espace de gestion</p>
+  <form id="form-connexion" class="carte">
+    <label class="champ" for="mdp" style="margin-top:0">Mot de passe</label>
+    <input id="mdp" type="password" autocomplete="current-password" required>
+    <button class="btn btn-principal btn-plein" style="margin-top:14px" type="submit" id="btn-connexion">Se connecter</button>
+    <div class="erreur" id="erreur-connexion" role="alert"></div>
+  </form>
+  <p class="aide" style="text-align:center"><a href="./">← Retour au site</a></p>
+</div>
+
+<!-- ============ APPLICATION ============ -->
+<div id="ecran-app" hidden>
+  <header class="entete">
+    <div class="marque">Naboo<small>Gestion</small></div>
+    <div class="liens">
+      <a href="./" target="_blank" rel="noopener">Voir le site</a>
+      <button type="button" id="btn-deconnexion">Quitter</button>
+    </div>
+  </header>
+  <nav class="onglets" role="tablist" aria-label="Sections">
+    <button role="tab" data-onglet="rdv" aria-selected="true">Rendez-vous<span class="pastille" id="pastille" hidden></span></button>
+    <button role="tab" data-onglet="dispo" aria-selected="false">Disponibilités</button>
+    <button role="tab" data-onglet="prestas" aria-selected="false">Prestations</button>
+    <button role="tab" data-onglet="reglages" aria-selected="false">Réglages</button>
+  </nav>
+  <main id="contenu"><div class="chargement">Chargement…</div></main>
+</div>
+
+<div class="barre" id="barre" hidden>
+  <div class="dedans">
+    <span class="txt">Modifications non enregistrées</span>
+    <button class="btn btn-lien" type="button" id="btn-annuler-modifs">Annuler</button>
+    <button class="btn btn-principal" type="button" id="btn-enregistrer">Enregistrer</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbyUwlR2mTC7KhBUHFwKYyeqnfpwNKab4c8nafU846EVxuu_buuZ8NpzbRB5TO8zI5Ke/exec';
+const CLE_JETON = 'naboo_admin_jeton';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const JOURS_COURTS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+const JOURS_SEMAINE = [[1, 'Lun.'], [2, 'Mar.'], [3, 'Mer.'], [4, 'Jeu.'], [5, 'Ven.'], [6, 'Sam.'], [7, 'Dim.']];
+const MOIS_COURTS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+
+const etat = {
+  jeton: null, onglet: 'rdv', filtre: 'traiter',
+  serveur: null,   // réglages tels qu'enregistrés
+  reglages: null,  // réglages en cours de modification
+  rdv: [], urlFeuille: '', jourBloquer: '',
+};
+
+// ---------- Stockage du jeton (confort : rester connectée sur ce téléphone) ----------
+function lireJeton() { try { return localStorage.getItem(CLE_JETON); } catch (e) { return null; } }
+function ecrireJeton(j) { try { j ? localStorage.setItem(CLE_JETON, j) : localStorage.removeItem(CLE_JETON); } catch (e) {} }
+
+// ---------- Appels au backend ----------
+async function api(op, donnees = {}) {
+  const r = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },  // évite le pré-contrôle CORS
+    body: JSON.stringify(Object.assign({ action: 'admin', op, jeton: etat.jeton }, donnees)),
+  });
+  const j = await r.json();
+  if (j.session === false) { deconnecter(true); throw new Error(j.erreur); }
+  if (!j.ok) throw new Error(j.erreur || 'Erreur');
+  return j;
+}
+
+function toast(msg, erreur) {
+  const t = $('toast');
+  t.textContent = msg; t.className = 'toast' + (erreur ? ' err' : ''); t.hidden = false;
+  clearTimeout(toast.minuteur);
+  toast.minuteur = setTimeout(() => { t.hidden = true; }, erreur ? 6000 : 3500);
+}
+
+async function occupe(bouton, f) {
+  const avant = bouton ? bouton.textContent : '';
+  if (bouton) { bouton.disabled = true; bouton.textContent = '…'; }
+  try { return await f(); }
+  catch (e) { toast(e.message, true); }
+  finally { if (bouton) { bouton.disabled = false; bouton.textContent = avant; } }
+}
+
+// ---------- Connexion ----------
+$('form-connexion').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const b = $('btn-connexion'); $('erreur-connexion').textContent = '';
+  b.disabled = true; b.textContent = 'Connexion…';
+  try {
+    const j = await api('connexion', { motDePasse: $('mdp').value });
+    etat.jeton = j.jeton; ecrireJeton(j.jeton); $('mdp').value = '';
+    await demarrer();
+  } catch (e) { $('erreur-connexion').textContent = e.message; }
+  finally { b.disabled = false; b.textContent = 'Se connecter'; }
+});
+
+function deconnecter(expire) {
+  etat.jeton = null; ecrireJeton(null);
+  $('ecran-app').hidden = true; $('barre').hidden = true; $('ecran-connexion').hidden = false;
+  if (expire) $('erreur-connexion').textContent = 'Session expirée, reconnecte-toi.';
+}
+$('btn-deconnexion').addEventListener('click', async () => {
+  if (modifie() && !confirm('Des modifications ne sont pas enregistrées. Quitter quand même ?')) return;
+  try { await api('deconnexion'); } catch (e) {}
+  deconnecter(false);
+});
+
+async function demarrer() {
+  $('ecran-connexion').hidden = true; $('ecran-app').hidden = false;
+  $('contenu').innerHTML = '<div class="chargement">Chargement…</div>';
+  const j = await api('etat');
+  etat.serveur = j.reglages; etat.reglages = clone(j.reglages); etat.rdv = j.rdv; etat.urlFeuille = j.urlFeuille;
+  afficher();
+}
+
+// ---------- Onglets ----------
+document.querySelector('.onglets').addEventListener('click', e => {
+  const b = e.target.closest('[data-onglet]');
+  if (!b) return;
+  etat.onglet = b.dataset.onglet;
+  document.querySelectorAll('.onglets [data-onglet]').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+  afficher();
+  window.scrollTo(0, 0);
+});
+
+function afficher() {
+  const n = etat.rdv.filter(r => r.statut === 'en_attente' && new Date(r.fin) > new Date()).length;
+  $('pastille').hidden = !n; $('pastille').textContent = n;
+  ({ rdv: vueRdv, dispo: vueDispo, prestas: vuePrestas, reglages: vueReglages })[etat.onglet]();
+  majBarre();
+}
+
+// ---------- Suivi des modifications ----------
+function modifie() { return etat.reglages && JSON.stringify(etat.reglages) !== JSON.stringify(etat.serveur); }
+function majBarre() { $('barre').hidden = !modifie() || $('ecran-app').hidden; }
+window.addEventListener('beforeunload', e => { if (modifie()) { e.preventDefault(); e.returnValue = ''; } });
+$('btn-annuler-modifs').addEventListener('click', () => { etat.reglages = clone(etat.serveur); afficher(); });
+$('btn-enregistrer').addEventListener('click', e => occupe(e.currentTarget, async () => {
+  const j = await api('enregistrer', { reglages: etat.reglages });
+  etat.serveur = j.reglages; etat.reglages = clone(j.reglages);
+  afficher(); toast(j.message);
+}));
+
+// ---------- Outils de dates ----------
+function dateLisible(iso) {
+  const d = new Date(iso + 'T12:00:00');
+  return JOURS_COURTS[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS_COURTS[d.getMonth()] + ' ' + d.getFullYear();
+}
+function aujourdhui() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+const hLisible = h => h.replace(':', 'h');
+function dureeLisible(m) { return m < 60 ? m + ' min' : Math.floor(m / 60) + ' h' + (m % 60 ? String(m % 60).padStart(2, '0') : ''); }
+
+// ================= RENDEZ-VOUS =================
+function vueRdv() {
+  const maintenant = new Date();
+  const groupes = {
+    traiter: etat.rdv.filter(r => r.statut === 'en_attente' && new Date(r.fin) > maintenant),
+    venir: etat.rdv.filter(r => r.statut === 'valide' && new Date(r.fin) > maintenant),
+    historique: etat.rdv.filter(r => new Date(r.fin) <= maintenant || r.statut === 'refuse' || r.statut === 'annule').reverse(),
+  };
+  const liste = groupes[etat.filtre];
+  const libelles = { traiter: 'À traiter', venir: 'À venir', historique: 'Historique' };
+  $('contenu').innerHTML =
+    '<div class="filtres" role="group" aria-label="Filtrer">' +
+      Object.keys(libelles).map(k => '<button type="button" data-filtre="' + k + '" aria-pressed="' + (etat.filtre === k) + '">' +
+        libelles[k] + ' (' + groupes[k].length + ')</button>').join('') +
+    '</div>' +
+    (liste.length ? liste.map(carteRdv).join('') :
+      '<div class="carte vide">' + ({ traiter: 'Aucune demande en attente 🎉', venir: 'Aucun rendez-vous à venir.', historique: 'Rien dans l\'historique.' })[etat.filtre] + '</div>') +
+    '<div class="actions"><button class="btn btn-second" type="button" id="btn-rafraichir">↻ Actualiser</button>' +
+    (etat.urlFeuille ? '<a class="btn btn-lien" href="' + esc(etat.urlFeuille) + '" target="_blank" rel="noopener">Ouvrir la feuille Google</a>' : '') + '</div>';
+
+  document.querySelectorAll('[data-filtre]').forEach(b => b.onclick = () => { etat.filtre = b.dataset.filtre; vueRdv(); });
+  $('btn-rafraichir').onclick = e => occupe(e.currentTarget, async () => {
+    const j = await api('etat'); etat.rdv = j.rdv; afficher(); toast('À jour');
+  });
+  document.querySelectorAll('[data-action]').forEach(b => b.onclick = () => actionRdv(b));
+}
+
+function carteRdv(r) {
+  const futur = new Date(r.fin) > new Date();
+  const statut = r.statut === 'en_attente' ? (r.expire ? 'Acompte non reçu (créneau libéré)' : 'En attente de l\'acompte')
+    : ({ valide: 'Validé', refuse: 'Refusé', annule: 'Annulé' })[r.statut] || r.statut;
+  const tel = r.telephone ? '<a href="tel:' + esc(r.telephone.replace(/\s/g, '')) + '">' + esc(r.telephone) + '</a>' : '—';
+  const lieu = r.lieu === 'domicile'
+    ? 'À domicile : <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(r.adresse) + '" target="_blank" rel="noopener">' + esc(r.adresse) + '</a>'
+    : 'Chez Naboo';
+  let boutons = '';
+  if (r.statut === 'en_attente' && futur) {
+    boutons = '<div class="wero">💶 Vérifie dans Wero que l\'acompte est arrivé avec le message « <b>' + esc(r.messageWero) + '</b> ».</div>' +
+      '<div class="actions"><button class="btn btn-principal" data-action="valider" data-id="' + esc(r.id) + '">Acompte reçu · Valider</button>' +
+      '<button class="btn btn-danger" data-action="refuser" data-id="' + esc(r.id) + '">Refuser</button></div>';
+  } else if (r.statut === 'valide' && futur) {
+    boutons = '<div class="actions"><button class="btn btn-danger" data-action="annuler" data-id="' + esc(r.id) + '">Annuler le rendez-vous</button></div>';
+  }
+  boutons += '<button class="btn btn-lien" data-action="supprimer" data-id="' + esc(r.id) + '">Supprimer définitivement</button>';
+  return '<article class="carte rdv">' +
+    '<div class="haut"><div><div class="quand">' + esc(r.quand) + '</div><div class="presta">' + esc(r.prestation) + '</div></div>' +
+    '<span class="statut st-' + esc(r.statut) + '">' + esc(statut) + '</span></div>' +
+    '<dl><dt>Cliente</dt><dd>' + esc(r.nom) + '</dd>' +
+    '<dt>Téléphone</dt><dd>' + tel + '</dd>' +
+    '<dt>Email</dt><dd><a href="mailto:' + esc(r.email) + '">' + esc(r.email) + '</a></dd>' +
+    '<dt>Lieu</dt><dd>' + lieu + '</dd>' +
+    (r.message ? '<dt>Message</dt><dd>' + esc(r.message) + '</dd>' : '') + '</dl>' +
+    boutons + '</article>';
+}
+
+async function actionRdv(b) {
+  const r = etat.rdv.find(x => x.id === b.dataset.id);
+  const qui = r ? r.nom + ' (' + r.quand + ')' : '';
+  const questions = {
+    valider: 'Valider le rendez-vous de ' + qui + ' ?\nIl sera ajouté à ton agenda et la cliente recevra sa confirmation.',
+    refuser: 'Refuser la demande de ' + qui + ' ?\nLa cliente sera prévenue par email.',
+    annuler: 'Annuler le rendez-vous de ' + qui + ' ?\nIl sera retiré de ton agenda et la cliente prévenue par email.',
+    supprimer: 'Supprimer définitivement ' + qui + ' ?\nAucun email ne sera envoyé (utile pour un test). Irréversible.',
+  };
+  if (!confirm(questions[b.dataset.action])) return;
+  await occupe(b, async () => {
+    const j = await api('rdv', { id: b.dataset.id, quoi: b.dataset.action });
+    etat.rdv = j.rdv; afficher(); toast(j.message);
+  });
+}
+
+// ================= DISPONIBILITÉS =================
+function plagesDuJour(iso) {
+  const R = etat.reglages;
+  if ((R.JOURS_FERMES || []).includes(iso)) return [];
+  if ((R.OUVERTURES_EXCEPTION || {})[iso]) return R.OUVERTURES_EXCEPTION[iso];
+  const js = new Date(iso + 'T12:00:00').getDay() || 7;
+  return R.HORAIRES[js] || [];
+}
+function creneauxDuJour(iso) {
+  const pas = Number(etat.reglages.PAS_CRENEAUX) || 60, res = [];
+  plagesDuJour(iso).forEach(([a, b]) => {
+    const [ha, ma] = a.split(':').map(Number), [hb, mb] = b.split(':').map(Number);
+    for (let t = ha * 60 + ma; t <= hb * 60 + mb; t += pas) res.push(String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'));
+  });
+  return res;
+}
+
+function vueDispo() {
+  const R = etat.reglages, auj = aujourdhui();
+  const lignesJours = JOURS_SEMAINE.map(([n, nom]) => {
+    const p = (R.HORAIRES[n] || [])[0];
+    return '<div class="jour-ligne"><label><input type="checkbox" data-jour="' + n + '"' + (p ? ' checked' : '') + '> ' + nom + '</label>' +
+      (p ? '<input type="time" step="900" data-jour-debut="' + n + '" value="' + p[0] + '" aria-label="' + nom + ' : à partir de">' +
+           '<input type="time" step="900" data-jour-fin="' + n + '" value="' + p[1] + '" aria-label="' + nom + ' : dernier début">'
+         : '<span class="ferme">Fermé</span>') + '</div>';
+  }).join('');
+
+  const fermes = (R.JOURS_FERMES || []).map(d => '<span class="puce">' + dateLisible(d) +
+    '<button type="button" data-retirer-ferme="' + d + '" aria-label="Rouvrir le ' + dateLisible(d) + '">✕</button></span>').join('');
+  const exceptions = Object.keys(R.OUVERTURES_EXCEPTION || {}).map(d => '<span class="puce">' + dateLisible(d) + ' · ' +
+    R.OUVERTURES_EXCEPTION[d].map(p => hLisible(p[0]) + '–' + hLisible(p[1])).join(', ') +
+    '<button type="button" data-retirer-exception="' + d + '" aria-label="Retirer">✕</button></span>').join('');
+  const bloques = Object.keys(R.CRENEAUX_BLOQUES || {}).map(d => '<b>' + dateLisible(d) + '</b><div class="puces">' +
+    R.CRENEAUX_BLOQUES[d].map(h => '<span class="puce">' + hLisible(h) +
+      '<button type="button" data-debloquer="' + d + '|' + h + '" aria-label="Débloquer">✕</button></span>').join('') + '</div>').join('');
+
+  const j = etat.jourBloquer;
+  let grille = '';
+  if (j) {
+    const cr = creneauxDuJour(j), bl = (R.CRENEAUX_BLOQUES || {})[j] || [];
+    grille = cr.length
+      ? '<p class="aide" style="margin:10px 0 0">Touche un créneau pour le bloquer (barré) ou le débloquer.</p><div class="grille">' +
+        cr.map(h => '<button type="button" data-basculer="' + h + '" aria-pressed="' + bl.includes(h) + '">' + hLisible(h) + '</button>').join('') + '</div>'
+      : '<p class="aide" style="margin:10px 0 0">Ce jour est fermé : aucun créneau à bloquer.</p>';
+  }
+
+  $('contenu').innerHTML =
+    '<section class="carte"><h2>Horaires de la semaine</h2>' +
+      '<p class="aide">Coche les jours où tu travailles. Indique la première et la dernière heure de <b>début</b> possible.</p>' +
+      lignesJours +
+      '<label class="case"><input type="checkbox" id="fin-avant"' + (R.DEBUT_SEULEMENT === false ? ' checked' : '') + '> <span>La prestation doit être <b>terminée</b> avant la 2e heure (sinon, c\'est la dernière heure de début).</span></label>' +
+    '</section>' +
+
+    '<section class="carte"><h2>Bloquer des créneaux</h2>' +
+      '<p class="aide">Pour un rendez-vous pris ailleurs (Instagram, téléphone) ou un empêchement.</p>' +
+      '<label class="champ" for="date-bloquer">Jour</label><input type="date" id="date-bloquer" min="' + auj + '" value="' + esc(j) + '">' +
+      grille +
+      (bloques ? '<div class="groupe-bloques">' + bloques + '</div>' : '') +
+    '</section>' +
+
+    '<section class="carte"><h2>Jours de fermeture</h2>' +
+      '<p class="aide">Congés, voyage, indisponibilité : aucune réservation possible ces jours-là.</p>' +
+      '<div class="ligne"><input type="date" id="date-fermer" min="' + auj + '" aria-label="Jour à fermer"><button class="btn btn-second fixe" type="button" id="btn-fermer">Fermer ce jour</button></div>' +
+      '<label class="case"><input type="checkbox" id="fermer-periode"> <span>Fermer une période (plusieurs jours)</span></label>' +
+      '<div id="bloc-periode" hidden><label class="champ" for="date-fermer-fin">Jusqu\'au (inclus)</label><input type="date" id="date-fermer-fin" min="' + auj + '"></div>' +
+      (fermes ? '<div class="puces">' + fermes + '</div>' : '') +
+    '</section>' +
+
+    '<section class="carte"><h2>Ouverture exceptionnelle</h2>' +
+      '<p class="aide">Ouvrir un jour où tu ne travailles pas d\'habitude (ex. un férié en semaine).</p>' +
+      '<label class="champ" for="date-ouvrir">Jour</label><input type="date" id="date-ouvrir" min="' + auj + '">' +
+      '<div class="ligne" style="margin-top:8px"><input type="time" step="900" id="ouvrir-debut" value="09:00" aria-label="À partir de"><input type="time" step="900" id="ouvrir-fin" value="16:00" aria-label="Dernier début"></div>' +
+      '<button class="btn btn-second btn-plein" style="margin-top:10px" type="button" id="btn-ouvrir">Ouvrir ce jour</button>' +
+      (exceptions ? '<div class="puces">' + exceptions + '</div>' : '') +
+    '</section>' +
+
+    '<section class="carte"><h2>Règles de réservation</h2>' +
+      champNombre('DELAI_MIN_HEURES', 'Réserver au moins … heures à l\'avance', 0, 720) +
+      champNombre('JOURS_MAX_A_L_AVANCE', 'Réservation possible jusqu\'à … jours', 1, 365) +
+      '<label class="champ" for="pas">Un créneau toutes les…</label><select id="pas">' +
+        [30, 60, 90, 120].map(m => '<option value="' + m + '"' + (Number(R.PAS_CRENEAUX) === m ? ' selected' : '') + '>' + dureeLisible(m) + '</option>').join('') + '</select>' +
+      champNombre('EXPIRATION_ATTENTE_HEURES', 'Sans acompte, libérer le créneau après … heures', 1, 336) +
+      champNombre('MAX_DEMANDES_PAR_EMAIL', 'Demandes en attente max par cliente', 1, 20) +
+    '</section>';
+
+  // Horaires
+  document.querySelectorAll('[data-jour]').forEach(c => c.onchange = () => {
+    R.HORAIRES[c.dataset.jour] = c.checked ? [['09:00', '16:00']] : []; vueDispo(); majBarre();
+  });
+  document.querySelectorAll('[data-jour-debut],[data-jour-fin]').forEach(inp => inp.onchange = () => {
+    const n = inp.dataset.jourDebut || inp.dataset.jourFin;
+    const p = R.HORAIRES[n][0];
+    if (inp.dataset.jourDebut) p[0] = inp.value; else p[1] = inp.value;
+    majBarre();
+  });
+  $('fin-avant').onchange = e => { R.DEBUT_SEULEMENT = !e.target.checked; majBarre(); };
+
+  // Créneaux bloqués
+  $('date-bloquer').onchange = e => { etat.jourBloquer = e.target.value; vueDispo(); };
+  document.querySelectorAll('[data-basculer]').forEach(b => b.onclick = () => {
+    const h = b.dataset.basculer, B = R.CRENEAUX_BLOQUES = R.CRENEAUX_BLOQUES || {};
+    const l = B[j] || [];
+    B[j] = l.includes(h) ? l.filter(x => x !== h) : [...l, h].sort();
+    if (!B[j].length) delete B[j];
+    vueDispo(); majBarre();
+  });
+  document.querySelectorAll('[data-debloquer]').forEach(b => b.onclick = () => {
+    const [d, h] = b.dataset.debloquer.split('|');
+    R.CRENEAUX_BLOQUES[d] = R.CRENEAUX_BLOQUES[d].filter(x => x !== h);
+    if (!R.CRENEAUX_BLOQUES[d].length) delete R.CRENEAUX_BLOQUES[d];
+    vueDispo(); majBarre();
+  });
+
+  // Fermetures
+  $('fermer-periode').onchange = e => { $('bloc-periode').hidden = !e.target.checked; };
+  $('btn-fermer').onclick = () => {
+    const a = $('date-fermer').value, b = $('fermer-periode').checked ? $('date-fermer-fin').value : a;
+    if (!a) return toast('Choisis un jour.', true);
+    if (!b || b < a) return toast('La date de fin doit être après la date de début.', true);
+    const jours = [];
+    for (let d = new Date(a + 'T12:00:00'); d <= new Date(b + 'T12:00:00'); d.setDate(d.getDate() + 1)) {
+      jours.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'));
+      if (jours.length > 120) return toast('Période trop longue (120 jours max).', true);
+    }
+    R.JOURS_FERMES = [...new Set([...(R.JOURS_FERMES || []), ...jours])].sort();
+    vueDispo(); majBarre();
+  };
+  document.querySelectorAll('[data-retirer-ferme]').forEach(b => b.onclick = () => {
+    R.JOURS_FERMES = R.JOURS_FERMES.filter(d => d !== b.dataset.retirerFerme); vueDispo(); majBarre();
+  });
+
+  // Ouvertures exceptionnelles
+  $('btn-ouvrir').onclick = () => {
+    const d = $('date-ouvrir').value, a = $('ouvrir-debut').value, b = $('ouvrir-fin').value;
+    if (!d || !a || !b) return toast('Choisis le jour et les heures.', true);
+    if (a > b) return toast('L\'heure de début doit être avant l\'heure de fin.', true);
+    R.OUVERTURES_EXCEPTION = R.OUVERTURES_EXCEPTION || {};
+    R.OUVERTURES_EXCEPTION[d] = [[a, b]];
+    R.JOURS_FERMES = (R.JOURS_FERMES || []).filter(x => x !== d);
+    vueDispo(); majBarre();
+  };
+  document.querySelectorAll('[data-retirer-exception]').forEach(b => b.onclick = () => {
+    delete R.OUVERTURES_EXCEPTION[b.dataset.retirerException]; vueDispo(); majBarre();
+  });
+
+  // Règles
+  $('pas').onchange = e => { R.PAS_CRENEAUX = Number(e.target.value); majBarre(); };
+  lierNombres();
+}
+
+function champNombre(cle, libelle, min, max) {
+  return '<label class="champ" for="n-' + cle + '">' + libelle + '</label>' +
+    '<input type="number" inputmode="numeric" id="n-' + cle + '" data-nombre="' + cle + '" min="' + min + '" max="' + max + '" value="' + esc(etat.reglages[cle]) + '">';
+}
+function lierNombres() {
+  document.querySelectorAll('[data-nombre]').forEach(inp => inp.oninput = () => {
+    etat.reglages[inp.dataset.nombre] = inp.value === '' ? '' : Number(inp.value); majBarre();
+  });
+}
+
+// ================= PRESTATIONS =================
+function optionsDuree(v) {
+  const vals = [];
+  for (let m = 30; m <= 720; m += 30) vals.push(m);
+  if (!vals.includes(Number(v))) vals.push(Number(v));
+  return vals.sort((a, b) => a - b).map(m => '<option value="' + m + '"' + (m === Number(v) ? ' selected' : '') + '>' + dureeLisible(m) + '</option>').join('');
+}
+
+function vuePrestas() {
+  const P = etat.reglages.PRESTATIONS;
+  $('contenu').innerHTML =
+    '<p class="aide">Les durées servent à éviter que deux rendez-vous se chevauchent. Une prestation décochée n\'est plus proposée sur le site.</p>' +
+    P.map((p, i) => '<section class="carte presta-carte' + (p.actif === false ? ' inactive' : '') + '">' +
+      '<div class="ligne"><input type="text" data-p="' + i + '" data-champ="nom" value="' + esc(p.nom) + '" aria-label="Nom" maxlength="60" placeholder="Nom de la prestation">' +
+        '<div class="ordre fixe"><button type="button" data-monter="' + i + '" aria-label="Monter"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+        '<button type="button" data-descendre="' + i + '" aria-label="Descendre"' + (i === P.length - 1 ? ' disabled' : '') + '>↓</button></div></div>' +
+      '<div class="ligne"><div><label class="champ" for="prix-' + i + '">Prix</label><input type="text" id="prix-' + i + '" data-p="' + i + '" data-champ="prix" value="' + esc(p.prix) + '" maxlength="20" placeholder="40 €"></div>' +
+        '<div><label class="champ" for="duree-' + i + '">Durée</label><select id="duree-' + i + '" data-p="' + i + '" data-champ="duree">' + optionsDuree(p.duree) + '</select></div></div>' +
+      '<div class="ligne" style="margin-top:6px"><label class="case" style="margin-top:6px"><input type="checkbox" data-actif="' + i + '"' + (p.actif !== false ? ' checked' : '') + '> <span>Proposée sur le site</span></label>' +
+        '<button class="btn btn-lien fixe" type="button" data-supprimer-p="' + i + '">Supprimer</button></div>' +
+    '</section>').join('') +
+    '<button class="btn btn-second btn-plein" type="button" id="btn-ajouter-p">+ Ajouter une prestation</button>';
+
+  document.querySelectorAll('[data-p]').forEach(inp => {
+    inp[inp.tagName === 'SELECT' ? 'onchange' : 'oninput'] = () => {
+      const p = P[inp.dataset.p];
+      p[inp.dataset.champ] = inp.dataset.champ === 'duree' ? Number(inp.value) : inp.value;
+      majBarre();
+    };
+  });
+  document.querySelectorAll('[data-actif]').forEach(c => c.onchange = () => { P[c.dataset.actif].actif = c.checked; vuePrestas(); majBarre(); });
+  const deplacer = (i, d) => { const [x] = P.splice(i, 1); P.splice(i + d, 0, x); vuePrestas(); majBarre(); };
+  document.querySelectorAll('[data-monter]').forEach(b => b.onclick = () => deplacer(Number(b.dataset.monter), -1));
+  document.querySelectorAll('[data-descendre]').forEach(b => b.onclick = () => deplacer(Number(b.dataset.descendre), 1));
+  document.querySelectorAll('[data-supprimer-p]').forEach(b => b.onclick = () => {
+    const p = P[b.dataset.supprimerP];
+    if (!confirm('Supprimer « ' + p.nom + ' » ? (Tu peux aussi simplement la décocher pour la masquer.)')) return;
+    P.splice(Number(b.dataset.supprimerP), 1); vuePrestas(); majBarre();
+  });
+  $('btn-ajouter-p').onclick = () => {
+    P.push({ nom: '', prix: '', duree: 120, actif: true }); vuePrestas(); majBarre();
+    const champs = document.querySelectorAll('[data-champ="nom"]'); champs[champs.length - 1].focus();
+  };
+}
+
+// ================= RÉGLAGES =================
+function vueReglages() {
+  const R = etat.reglages;
+  const rappels = [[0, 'Aucun'], [30, '30 min avant'], [60, '1 h avant'], [120, '2 h avant'], [1440, 'La veille']];
+  if (!rappels.some(r => r[0] === Number(R.RAPPEL_MINUTES))) rappels.push([Number(R.RAPPEL_MINUTES), R.RAPPEL_MINUTES + ' min avant']);
+  $('contenu').innerHTML =
+    '<section class="carte"><h2>Acompte</h2>' +
+      champTexte('ACOMPTE', 'Montant de l\'acompte', '10 €', 20) +
+      champTexte('WERO_NUMERO', 'Numéro Wero', '07 52 34 16 52', 30, 'tel') +
+    '</section>' +
+    '<section class="carte"><h2>Lieu</h2>' +
+      champTexte('SUPPLEMENT_DOMICILE', 'Supplément pour un rendez-vous à domicile', '15 €', 20) +
+      champTexte('ADRESSE_SALON', 'Adresse où tu reçois (privée)', 'N°, rue, code postal', 200) +
+      '<p class="aide" style="margin-top:6px">Jamais affichée sur le site : envoyée uniquement à la cliente dans l\'email de confirmation, après validation.</p>' +
+    '</section>' +
+    '<section class="carte"><h2>Agenda</h2>' +
+      '<label class="champ" for="rappel">Alerte dans ton agenda</label><select id="rappel">' +
+        rappels.map(r => '<option value="' + r[0] + '"' + (Number(R.RAPPEL_MINUTES) === r[0] ? ' selected' : '') + '>' + r[1] + '</option>').join('') + '</select>' +
+    '</section>' +
+    '<section class="carte"><h2>Boutiques de mèches</h2>' +
+      '<p class="aide">Affichées sur le site dans « Où acheter vos mèches ».</p>' +
+      (R.BOUTIQUES || []).map((b, i) => '<div style="border-top:1px solid var(--bord);padding-top:8px;margin-top:8px">' +
+        '<div class="ligne"><input type="text" data-b="' + i + '" data-champ="nom" value="' + esc(b.nom) + '" placeholder="Nom" aria-label="Nom de la boutique" maxlength="60">' +
+        '<button class="btn btn-lien fixe" type="button" data-supprimer-b="' + i + '">Retirer</button></div>' +
+        '<input type="text" style="margin-top:6px" data-b="' + i + '" data-champ="adresse" value="' + esc(b.adresse) + '" placeholder="Adresse" aria-label="Adresse" maxlength="150">' +
+        '<input type="tel" style="margin-top:6px" data-b="' + i + '" data-champ="tel" value="' + esc(b.tel) + '" placeholder="Téléphone" aria-label="Téléphone" maxlength="30"></div>').join('') +
+      '<button class="btn btn-second btn-plein" style="margin-top:12px" type="button" id="btn-ajouter-b">+ Ajouter une boutique</button>' +
+    '</section>' +
+    '<section class="carte"><h2>Mot de passe de cet espace</h2>' +
+      '<label class="champ" for="mdp-actuel">Mot de passe actuel</label><input type="password" id="mdp-actuel" autocomplete="current-password">' +
+      '<label class="champ" for="mdp-nouveau">Nouveau mot de passe (10 caractères minimum)</label><input type="password" id="mdp-nouveau" autocomplete="new-password">' +
+      '<label class="champ" for="mdp-confirme">Confirmer</label><input type="password" id="mdp-confirme" autocomplete="new-password">' +
+      '<button class="btn btn-second btn-plein" style="margin-top:12px" type="button" id="btn-mdp">Changer le mot de passe</button>' +
+    '</section>';
+
+  document.querySelectorAll('[data-texte]').forEach(inp => inp.oninput = () => { R[inp.dataset.texte] = inp.value; majBarre(); });
+  $('rappel').onchange = e => { R.RAPPEL_MINUTES = Number(e.target.value); majBarre(); };
+  document.querySelectorAll('[data-b]').forEach(inp => inp.oninput = () => { R.BOUTIQUES[inp.dataset.b][inp.dataset.champ] = inp.value; majBarre(); });
+  document.querySelectorAll('[data-supprimer-b]').forEach(b => b.onclick = () => { R.BOUTIQUES.splice(Number(b.dataset.supprimerB), 1); vueReglages(); majBarre(); });
+  $('btn-ajouter-b').onclick = () => { R.BOUTIQUES = R.BOUTIQUES || []; R.BOUTIQUES.push({ nom: '', adresse: '', tel: '' }); vueReglages(); majBarre(); };
+  $('btn-mdp').onclick = e => {
+    const n = $('mdp-nouveau').value;
+    if (n.length < 10) return toast('10 caractères minimum.', true);
+    if (n !== $('mdp-confirme').value) return toast('Les deux mots de passe ne correspondent pas.', true);
+    occupe(e.currentTarget, async () => {
+      const j = await api('motdepasse', { actuel: $('mdp-actuel').value, nouveau: n });
+      ['mdp-actuel', 'mdp-nouveau', 'mdp-confirme'].forEach(id => { $(id).value = ''; });
+      toast(j.message);
+    });
+  };
+}
+function champTexte(cle, libelle, ph, max, type) {
+  return '<label class="champ" for="t-' + cle + '">' + libelle + '</label>' +
+    '<input type="' + (type || 'text') + '" id="t-' + cle + '" data-texte="' + cle + '" value="' + esc(etat.reglages[cle]) + '" placeholder="' + esc(ph) + '" maxlength="' + max + '">';
+}
+
+// ---------- Lancement ----------
+(async () => {
+  etat.jeton = lireJeton();
+  if (!etat.jeton) return deconnecter(false);
+  try { await demarrer(); } catch (e) { if (etat.jeton) { deconnecter(false); $('erreur-connexion').textContent = e.message; } }
+})();
+</script>
+</body>
+</html>

@@ -18,6 +18,7 @@ Cliente ──▶ site (GitHub Pages) ──▶ Apps Script (Google, gratuit) �
 |---|---|
 | `index.html` | Le site (une seule page). Sans backend branché, il tourne en **mode démo**. |
 | `backend/Code.gs` | Le backend à coller dans Google Apps Script (un seul fichier) |
+| `admin.html` | **Espace de gestion** (mot de passe) : rendez-vous, disponibilités, prestations, réglages |
 | `outils/trouver_calendrier_icloud.py` | Trouve l'URL CalDAV de ton calendrier iCloud (à lancer une fois) |
 | `tests/backend.test.js` | Tests automatisés des créneaux et du fichier agenda : `node tests/backend.test.js` |
 
@@ -32,7 +33,16 @@ Cliente ──▶ site (GitHub Pages) ──▶ Apps Script (Google, gratuit) �
 - **À domicile dans Poitiers : +15 €** (l'adresse de la cliente devient le lieu de l'événement).
 - **Mèches non fournies** : liste de boutiques dans `index.html` (`BOUTIQUES`).
 
-Tout se règle dans le bloc `CONFIG` en haut de `backend/Code.gs` (et pour l'affichage, dans `index.html`).
+Tout se règle depuis l'**espace de gestion** : https://mama2703.github.io/prise_de_rdv/admin.html
+(valider / refuser / annuler / supprimer un rendez-vous, horaires, jours fermés, créneaux bloqués, ouvertures
+exceptionnelles, prestations, prix, durées, acompte, numéro Wero, supplément domicile, adresse, boutiques, mot de passe).
+Les valeurs du bloc `CONFIG` de `backend/Code.gs` ne servent qu'au premier lancement.
+
+### Sécurité de l'espace de gestion
+- Mot de passe défini dans la propriété du script `ADMIN_MOT_DE_PASSE` (10 caractères minimum), puis modifiable
+  depuis l'onglet Réglages (il est alors stocké haché et salé, `ADMIN_HASH`).
+- 8 essais ratés → connexion bloquée 15 minutes. Session valable 6 h.
+- Tous les réglages sont revérifiés côté Google (formats, longueurs, bornes) avant d'être enregistrés.
 
 ---
 

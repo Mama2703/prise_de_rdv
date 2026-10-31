@@ -52,7 +52,7 @@ global.SpreadsheetApp = {
 
 // ---------- Chargement du code ----------
 const code = fs.readFileSync(path.join(__dirname, '..', 'backend', 'Code.gs'), 'utf8');
-const B = new Function(code + '; return { creneauxLibres_, construireIcs_, plieLigne_, formatQuand_, dateParis_, CONFIG, STATUT };')();
+const B = new Function(code + '; return { creneauxLibres_, construireIcs_, plieLigne_, formatQuand_, dateParis_, CONFIG, STATUT, valideReglages_, reglagesActuels_, configPublique_, egal_ };')();
 
 // Ligne de la feuille : [id, token, creeLe, statut, prestationId, prestation, debut, fin, ...]
 function ligne(id, statut, debutParis, dureeH, creeIlYaH = 1) {
@@ -131,6 +131,78 @@ test('lignes .ics pliées à 75 octets maximum, accents compris', () => {
   const longue = 'DESCRIPTION:' + 'é'.repeat(100);
   B.plieLigne_(longue).split('\r\n').forEach(l => assert.ok(Buffer.byteLength(l, 'utf8') <= 75));
   assert.strictEqual(B.plieLigne_(longue).split('\r\n').map((l, i) => i ? l.slice(1) : l).join(''), longue);
+});
+
+console.log('Réglages modifiables (page d\'administration)');
+function avec(changes, f) {
+  const avant = JSON.parse(JSON.stringify(B.CONFIG));
+  Object.assign(B.CONFIG, changes);
+  try { f(); } finally { Object.keys(B.CONFIG).forEach(k => delete B.CONFIG[k]); Object.assign(B.CONFIG, avant); }
+}
+test('créneau bloqué à la main : n\'est plus proposé', () => {
+  avec({ CRENEAUX_BLOQUES: { '2026-11-07': ['10:00', '14:00'] } }, () => {
+    const c = B.creneauxLibres_('2026-11-07', 'twist');
+    assert.ok(!c.includes('10:00') && !c.includes('14:00') && c.includes('11:00'));
+  });
+});
+test('ouverture exceptionnelle un mercredi', () => {
+  avec({ OUVERTURES_EXCEPTION: { '2026-11-11': [['13:00', '15:00']] } }, () => {
+    assert.deepStrictEqual(B.creneauxLibres_('2026-11-11', 'twist'), ['13:00', '14:00', '15:00']);
+  });
+});
+test('prestation désactivée : plus réservable ni affichée', () => {
+  const pr = JSON.parse(JSON.stringify(B.CONFIG.PRESTATIONS));
+  pr[0].actif = false;
+  avec({ PRESTATIONS: pr }, () => {
+    assert.deepStrictEqual(B.creneauxLibres_('2026-11-07', pr[0].id), []);
+    assert.ok(!B.configPublique_().prestations.some(p => p.id === pr[0].id));
+  });
+});
+test('nouvelles horaires (vendredi 18 h-20 h) prises en compte', () => {
+  const h = JSON.parse(JSON.stringify(B.CONFIG.HORAIRES)); h[5] = [['18:00', '20:00']];
+  avec({ HORAIRES: h }, () => {
+    assert.deepStrictEqual(B.creneauxLibres_('2026-11-06', 'twist'), ['18:00', '19:00', '20:00']);
+  });
+});
+test('validation : les réglages actuels sont acceptés tels quels', () => {
+  const r = B.valideReglages_(B.reglagesActuels_());
+  assert.strictEqual(r.PRESTATIONS.length, 5);
+  assert.strictEqual(r.ACOMPTE, '10 €');
+});
+test('validation : refuse une durée absurde, des horaires inversés, aucune prestation active', () => {
+  const base = () => JSON.parse(JSON.stringify(B.reglagesActuels_()));
+  let r = base(); r.PRESTATIONS[0].duree = 5000;
+  assert.throws(() => B.valideReglages_(r), /Durée/);
+  r = base(); r.HORAIRES[6] = [['16:00', '09:00']];
+  assert.throws(() => B.valideReglages_(r), /horaires/i);
+  r = base(); r.PRESTATIONS.forEach(p => { p.actif = false; });
+  assert.throws(() => B.valideReglages_(r), /active/);
+});
+test('validation : nouvelle prestation sans identifiant reçoit un id propre et unique', () => {
+  const r = JSON.parse(JSON.stringify(B.reglagesActuels_()));
+  r.PRESTATIONS.push({ nom: 'Twist', duree: 90, prix: '20 €' });
+  r.PRESTATIONS.push({ nom: 'Fulani Braids à l\'été', duree: 240, prix: '55 €' });
+  const ids = B.valideReglages_(r).PRESTATIONS.map(p => p.id);
+  assert.strictEqual(new Set(ids).size, ids.length);
+  assert.ok(ids.includes('fulani-braids-a-l-ete'));
+});
+test('validation : dates passées et créneaux mal formés retirés', () => {
+  const r = JSON.parse(JSON.stringify(B.reglagesActuels_()));
+  r.JOURS_FERMES = ['2020-01-01', '2026-12-26', 'pas-une-date', '2026-12-26'];
+  r.CRENEAUX_BLOQUES = { '2020-01-01': ['10:00'], '2026-11-14': ['10:00', '25:00'] };
+  const o = B.valideReglages_(r);
+  assert.deepStrictEqual(o.JOURS_FERMES, ['2026-12-26']);
+  assert.deepStrictEqual(o.CRENEAUX_BLOQUES, { '2026-11-14': ['10:00'] });
+});
+test('validation : refuse un texte trop long (injection, abus)', () => {
+  const r = JSON.parse(JSON.stringify(B.reglagesActuels_()));
+  r.ADRESSE_SALON = 'x'.repeat(500);
+  assert.throws(() => B.valideReglages_(r), /200 caractères/);
+});
+test('comparaison de mot de passe', () => {
+  assert.ok(B.egal_('abc', 'abc'));
+  assert.ok(!B.egal_('abc', 'abd'));
+  assert.ok(!B.egal_('', ''));
 });
 
 console.log(`\n${ok} réussi(s), ${ko} échoué(s)`);
