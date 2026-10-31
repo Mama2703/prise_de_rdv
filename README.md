@@ -17,7 +17,8 @@ Cliente ──▶ site (GitHub Pages) ──▶ Apps Script (Google, gratuit) �
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Le site (une seule page). Sans backend branché, il tourne en **mode démo**. |
-| `backend/Code.gs` | Le backend à coller dans Google Apps Script (un seul fichier) |
+| `backend/Chargeur.gs` | **À coller une seule fois** dans Apps Script : télécharge `Code.gs` depuis GitHub, donc chaque mise à jour s'applique toute seule (≤ 10 min) |
+| `backend/Code.gs` | Le vrai code du backend (chargé automatiquement, ne plus le coller à la main) |
 | `admin.html` | **Espace de gestion** (mot de passe) : rendez-vous, disponibilités, prestations, réglages |
 | `outils/trouver_calendrier_icloud.py` | Trouve l'URL CalDAV de ton calendrier iCloud (à lancer une fois) |
 | `tests/backend.test.js` | Tests automatisés des créneaux et du fichier agenda : `node tests/backend.test.js` |
@@ -89,3 +90,18 @@ Les valeurs du bloc `CONFIG` de `backend/Code.gs` ne servent qu'au premier lance
 - Pas de temps de trajet ajouté automatiquement pour les rendez-vous à domicile.
 - Quota Google gratuit : ~100 emails/jour (2 par demande, 1 par validation).
 - Mentions légales : pas de SIRET pour l'instant ; à ajouter dans la rubrique « Mentions légales » de `index.html` si l'activité est déclarée un jour.
+
+## Mises à jour automatiques du backend
+
+Depuis l'installation de `backend/Chargeur.gs`, Apps Script n'a plus besoin d'être touché :
+le chargeur télécharge `backend/Code.gs` depuis la branche `main` (vérification toutes les 5 minutes,
+contrôle de syntaxe, copie de secours dans les propriétés du script si GitHub est indisponible).
+Menu de la feuille **Rendez-vous → Forcer la mise à jour du code** pour l'appliquer immédiatement.
+⚠️ Seul cas où il faut redéployer : si une nouvelle *autorisation Google* devient nécessaire
+(les autorisations actuelles couvrent feuille, emails, iCloud et Drive pour les photos).
+
+## Statistiques
+
+Onglet **Statistiques** de l'espace de gestion : visites par jour, demandes de rendez-vous, taux de réservation,
+prestations les plus choisies. Comptage anonyme côté Google (propriété `STATS`, 180 jours) : aucun cookie,
+aucune adresse IP, aucun identifiant — pas de bandeau de consentement nécessaire.

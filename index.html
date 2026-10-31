@@ -209,7 +209,7 @@
       <p><b>Éditrice du site :</b> Naboo, coiffure afro, 86000 Poitiers. Contact : <a href="tel:+33752341652">07 52 34 16 52</a>, Instagram <a href="https://www.instagram.com/naboo__dioum/" target="_blank" rel="noopener">@naboo__dioum</a>.</p>
       <p><b>Hébergement :</b> GitHub Pages, GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis.</p>
       <p><b>Vos données :</b> les informations du formulaire (nom, email, téléphone, adresse si à domicile, message) servent uniquement à gérer votre rendez-vous. Elles sont enregistrées dans l'espace Google de Naboo et ne sont ni vendues ni partagées. Elles sont conservées le temps nécessaire à la gestion des rendez-vous. Vous pouvez demander à les consulter ou les supprimer à tout moment par téléphone ou sur Instagram.</p>
-      <p>Ce site n'utilise ni cookies publicitaires ni outil de suivi.</p>
+      <p>Ce site n'utilise aucun cookie ni outil de suivi. Seule une mesure d'audience anonyme est faite (nombre de visites et de demandes par jour), sans adresse IP ni identifiant.</p>
     </div>
   </details>
 </main>
@@ -249,6 +249,14 @@ async function envoyer(data) {
   const j = await r.json();
   if (!j.ok) throw new Error(j.erreur || 'Erreur serveur');
   return j;
+}
+
+// Statistique anonyme : quelle prestation intéresse (un seul comptage par prestation et par visite)
+const vuesComptees = {};
+function compterVue(id) {
+  if (DEMO || vuesComptees[id]) return;
+  vuesComptees[id] = true;
+  fetch(API_URL + '?action=vue&presta=' + encodeURIComponent(id)).catch(() => {});
 }
 
 // ---------- Mode démo ----------
@@ -297,6 +305,7 @@ async function init() {
       const b = bouton('', '<span class="presta-nom">' + esc(p.nom) + '</span><span class="presta-droite">' +
         (p.prix ? '<b>' + esc(p.prix) + '</b>' : '') + '<small>environ ' + dureeTxt(p.duree) + '</small></span>', () => {
         selectionne(c, b); etat.presta = p; etat.heure = null;
+        compterVue(p.id);
         $('s2').hidden = false; $('s3').hidden = true;
         if (etat.date) chargerCreneaux(); else afficherJours();
         $('s2').scrollIntoView({ behavior: DOUX, block: 'start' });

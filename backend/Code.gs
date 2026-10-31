@@ -82,7 +82,11 @@ function doGet(e) {
     chargerReglages_();
     switch (p.action) {
       case 'config':
+        compter_('visite');
         return json_({ ok: true, config: configPublique_() });
+      case 'vue':
+        if (prestaActive_(p.presta)) compter_('vue', p.presta);
+        return json_({ ok: true });
       case 'slots':
         return json_({ ok: true, creneaux: creneauxLibres_(p.date, p.prestation) });
       case 'examiner':
@@ -187,6 +191,7 @@ function doPost(e) {
         '<p>' + esc_(CONFIG.NOM_ACTIVITE) + '</p>',
     });
 
+    compter_('demande', presta.id);
     return json_({ ok: true, id: id });
   } catch (err) {
     console.error(err);
@@ -569,6 +574,8 @@ function admin_(d) {
     case 'rdv':
       if (['valider', 'refuser', 'annuler', 'supprimer'].indexOf(d.quoi) === -1) throw new Error('Action inconnue.');
       return { ok: true, message: actionRdv_(String(d.id || ''), d.quoi), rdv: listeRdvAdmin_() };
+    case 'stats':
+      return { ok: true, stats: statsAdmin_() };
     case 'motdepasse': {
       if (!motDePasseCorrect_(String(d.actuel || ''))) return { ok: false, erreur: 'Mot de passe actuel incorrect.' };
       const nouveau = String(d.nouveau || '');
@@ -630,6 +637,54 @@ function listeRdvAdmin_() {
       messageWero: 'Acompte ' + o.nom + ' ' + Utilities.formatDate(new Date(o.debut), CONFIG.FUSEAU, 'dd/MM'),
     }))
     .sort((a, b) => new Date(a.debut) - new Date(b.debut));
+}
+
+// ============================== STATISTIQUES (anonymes, sans cookie) ==============================
+// On ne compte que des nombres : aucune adresse IP, aucun identifiant, aucun cookie.
+
+const STATS_JOURS_GARDES = 180;
+
+function lireStats_() {
+  try { return JSON.parse(PropertiesService.getScriptProperties().getProperty('STATS') || '{}'); } catch (e) { return {}; }
+}
+
+/** @param quoi 'visite' (page ouverte), 'vue' (prestation choisie) ou 'demande' (demande envoyée) */
+function compter_(quoi, prestaId) {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(3000)) return; // trop de monde au même moment : on ne bloque jamais la cliente pour une statistique
+  try {
+    const st = lireStats_();
+    st.jours = st.jours || {};
+    st.prestas = st.prestas || {};
+    const j = Utilities.formatDate(new Date(), CONFIG.FUSEAU, 'yyyy-MM-dd');
+    const jour = st.jours[j] = st.jours[j] || { v: 0, r: 0 };
+    if (quoi === 'visite') jour.v++;
+    if (quoi === 'demande') jour.r++;
+    if (prestaId) {
+      const c = st.prestas[prestaId] = st.prestas[prestaId] || { v: 0, r: 0 };
+      if (quoi === 'vue') c.v++;
+      if (quoi === 'demande') c.r++;
+    }
+    const cles = Object.keys(st.jours).sort();
+    while (cles.length > STATS_JOURS_GARDES) delete st.jours[cles.shift()];
+    PropertiesService.getScriptProperties().setProperty('STATS', JSON.stringify(st));
+  } catch (e) {
+    console.error('Statistiques', e);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function statsAdmin_() {
+  const st = lireStats_();
+  const noms = {};
+  (CONFIG.PRESTATIONS || []).forEach(p => { noms[p.id] = p.nom; });
+  return {
+    jours: st.jours || {},
+    prestas: Object.keys(st.prestas || {}).map(id => ({ id, nom: noms[id] || id, vues: st.prestas[id].v, demandes: st.prestas[id].r }))
+      .sort((a, b) => b.vues - a.vues),
+    aujourdhui: Utilities.formatDate(new Date(), CONFIG.FUSEAU, 'yyyy-MM-dd'),
+  };
 }
 
 function urlFeuille_() {
